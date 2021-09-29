@@ -1,0 +1,9 @@
+name: perfect_freehand
+description: A simple command-line application.
+version: 1.0.0
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dev_dependencies:
+  lints: ^1.0.0
