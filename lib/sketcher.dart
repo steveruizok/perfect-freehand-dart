@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 
 class Sketcher extends CustomPainter {
   final List<Stroke> lines;
+  final StrokeOptions options;
 
-  Sketcher({required this.lines});
+  Sketcher({required this.lines, required this.options});
 
   // Paint a line on the canvas
   void paintLine(Stroke line, Canvas canvas, Paint paint) {
@@ -44,8 +45,7 @@ class Sketcher extends CustomPainter {
     for (int i = 0; i < lines.length; ++i) {
       var line = lines[i];
 
-      // Apply steamline to points
-      final options = StrokeOptions();
+      // Get Stroke Points
 
       final strokePoints = getStrokePoints(line.path, options);
 
