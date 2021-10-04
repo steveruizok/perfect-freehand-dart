@@ -3,12 +3,11 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 
-import './perfect-freehand/stroke.dart';
-import "./perfect-freehand/point.dart";
-import "./perfect-freehand/stroke_options.dart";
-import "./sketcher.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:perfect_freehand/perfect_freehand.dart';
+
+import "./sketcher.dart";
 
 class DrawingPage extends StatefulWidget {
   const DrawingPage({Key? key}) : super(key: key);
@@ -304,6 +303,7 @@ class _DrawingPageState extends State<DrawingPage> {
                   ? ElevatedButton(
                       onPressed: () async {
                         await saveSignature();
+                        
                         Navigator.push(
                             context,
                             MaterialPageRoute(

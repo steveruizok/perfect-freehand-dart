@@ -1,8 +1,9 @@
 import 'dart:math';
+
+import './get_stroke_radius.dart';
 import './point.dart';
 import './stroke_options.dart';
 import './stroke_point.dart';
-import './get_stroke_radius.dart';
 import './vec.dart';
 
 const rateOfPressureChange = 0.275;

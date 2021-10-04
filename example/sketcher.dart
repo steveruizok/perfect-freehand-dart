@@ -1,8 +1,5 @@
-import './perfect-freehand/get_stroke_outline_points.dart';
-import './perfect-freehand/stroke.dart';
-import './perfect-freehand/stroke_options.dart';
-import './perfect-freehand/get_stroke_points.dart';
 import 'package:flutter/material.dart';
+import 'package:perfect_freehand/perfect_freehand.dart';
 
 class Sketcher extends CustomPainter {
   final List<Stroke> lines;
