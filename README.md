@@ -1,4 +1,4 @@
-# ![Screenshot](docs/assets/perfect-freehand-logo.svg "Perfect Freehand")
+# ![Screenshot](doc/assets/perfect-freehand-logo.svg "Perfect Freehand")
 
 Draw perfect pressure-sensitive freehand lines.
 
