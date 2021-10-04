@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'point.dart';
 
+/// Various (mostly vector) math helpers. Each function returns a new Point.
+
 Point neg(Point A) {
   return Point(-A.x, -A.y, A.p);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 import 'stroke.dart';
+import 'stroke_options.dart';
 
 class Sketcher extends CustomPainter {
   final List<Stroke> lines;
@@ -44,12 +45,19 @@ class Sketcher extends CustomPainter {
       var line = lines[i];
 
       // Get Stroke Points
-
-      final strokePoints = getStrokePoints(line.points, options);
-
-      final outlinePoints = getStrokeOutlinePoints(strokePoints, options);
-
-      line = Stroke(outlinePoints);
+      line = Stroke(getStroke(
+        line.points,
+        size: options.size,
+        thinning: options.thinning,
+        smoothing: options.smoothing,
+        streamline: options.streamline,
+        taperStart: options.taperStart,
+        capStart: options.capStart,
+        taperEnd: options.taperEnd,
+        capEnd: options.capEnd,
+        simulatePressure: options.simulatePressure,
+        isComplete: options.isComplete,
+      ));
 
       // Paint the line
       paintLine(line, canvas, paint);
