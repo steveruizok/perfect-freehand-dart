@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import "./point.dart";
 
 Point neg(Point A) {

@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import './perfect-freehand/stroke.dart';
-import "./perfect-freehand/point.dart";
-import "./perfect-freehand/stroke_options.dart";
-import "./sketcher.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:perfect_freehand/perfect_freehand.dart';
+
+import "./sketcher.dart";
 
 class DrawingPage extends StatefulWidget {
   const DrawingPage({Key? key}) : super(key: key);
@@ -224,7 +223,6 @@ class _DrawingPageState extends State<DrawingPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               buildClearButton(),
-              
             ]));
   }
 
@@ -232,9 +230,9 @@ class _DrawingPageState extends State<DrawingPage> {
     return GestureDetector(
       onTap: clear,
       child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: const CircleAvatar(
-        child: Icon(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: const CircleAvatar(
+            child: Icon(
           Icons.replay,
           size: 20.0,
           color: Colors.white,
