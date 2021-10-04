@@ -1,0 +1,21 @@
+name: perfect_freehand_example
+version: 1.0.0
+description: Draw perfect pressure-sensitive freehand lines. Flutter example.
+homepage: https://github.com/steveruizok/perfect-freehand-dart
+repository: https://github.com/steveruizok/perfect-freehand-dart
+documentation: https://github.com/steveruizok/perfect-freehand-dart
+issue_tracker: https://github.com/steveruizok/perfect-freehand-dart/issues
+publish_to: "none"
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  perfect_freehand:
+    path: ../perfect_freehand
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+flutter:
+  uses-material-design: true

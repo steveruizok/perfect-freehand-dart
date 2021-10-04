@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
-import "./sketcher.dart";
+import "stroke.dart";
+import "sketcher.dart";
 
 class DrawingPage extends StatefulWidget {
   const DrawingPage({Key? key}) : super(key: key);
@@ -43,8 +44,8 @@ class _DrawingPageState extends State<DrawingPage> {
     final box = context.findRenderObject() as RenderBox;
     final offset = box.globalToLocal(details.globalPosition);
     final point = Point(offset.dx, offset.dy);
-    final path = [point];
-    line = Stroke(path, false);
+    final points = [point];
+    line = Stroke(points);
     currentLineStreamController.add(line!);
   }
 
@@ -52,8 +53,8 @@ class _DrawingPageState extends State<DrawingPage> {
     final box = context.findRenderObject() as RenderBox;
     final offset = box.globalToLocal(details.globalPosition);
     final point = Point(offset.dx, offset.dy);
-    final path = [...line!.path, point];
-    line = Stroke(path, false);
+    final points = [...line!.points, point];
+    line = Stroke(points);
     currentLineStreamController.add(line!);
   }
 

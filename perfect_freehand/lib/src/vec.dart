@@ -1,6 +1,5 @@
 import 'dart:math';
-
-import "./point.dart";
+import 'point.dart';
 
 Point neg(Point A) {
   return Point(-A.x, -A.y, A.p);
@@ -53,13 +52,10 @@ Point prj(Point A, Point B, double d) {
 Point rotAround(Point A, Point C, double r) {
   final s = sin(r);
   final c = cos(r);
-
   final px = A.x - C.x;
   final py = A.y - C.y;
-
   final nx = px * c - py * s;
   final ny = px * s + py * c;
-
   return Point(nx + C.x, ny + C.y);
 }
 
