@@ -3,25 +3,25 @@ import 'stroke_point.dart';
 import 'vec.dart';
 
 /// Get an array of points as objects with an adjusted point, pressure, vector, distance, and runningLength for the provided [points]. Used internally by `getStroke` but possibly of separate interest. Can be passed to `getStrokeOutlinePoints`.
-/// 
+///
 /// The [size] argument sets the base diameter for the shape.
-/// 
+///
 /// The [thinning] argument sets the effect of pressure on the stroke's size.
-/// 
+///
 /// The [smoothing] argument sets the density of points along the stroke's edges.
-/// 
+///
 /// The [streamline] argument sets the level of variation allowed in the input points.
-/// 
+///
 /// The [taperStart] argument sets the distance to taper the front of the stroke.
-/// 
+///
 /// The [capStart] argument sets whether to add a cap to the start of the stroke.
-/// 
+///
 /// The [taperEnd] argument sets the distance to taper the end of the stroke.
-/// 
+///
 /// The [capEnd] argument sets whether to add a cap to the end of the stroke.
-/// 
+///
 /// The [simulatePressure] argument sets whether to simulate pressure or use the point's provided pressures.
-/// 
+///
 /// The [isComplete] argument sets whether the line is complete.
 List<StrokePoint> getStrokePoints(
   List<Point> points, {

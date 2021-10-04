@@ -4,13 +4,13 @@ import 'point.dart';
 class StrokePoint {
   /// The point's x and y coordinates and pressure.
   final Point point;
-  
+
   // The vector between this point and the previous point.
   Point vector;
-  
+
   // The distance from this point and the previous point.
   final double distance;
-  
+
   // The running length of the line at this point.
   final double runningLength;
 
