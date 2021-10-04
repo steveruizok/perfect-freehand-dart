@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   perfect_freehand:
-    path: ../perfect_freehand
+    path: ../
 dev_dependencies:
   flutter_test:
     sdk: flutter
