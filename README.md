@@ -1,4 +1,4 @@
-# ![Screenshot](doc/assets/perfect-freehand-logo.svg "Perfect Freehand")
+# ![Screenshot](https://github.com/steveruizok/perfect-freehand-dart/blob/main/doc/assets/perfect-freehand-logo.svg "Perfect Freehand")
 
 Draw perfect pressure-sensitive freehand lines.
 
