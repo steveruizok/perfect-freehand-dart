@@ -10,9 +10,34 @@ Draw perfect pressure-sensitive freehand lines.
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Support](#support)
-- [Discussion](#discussion)
+- [Community](#community)
 - [Author](#author)
+
+## Introduction
+
+This package exports a function named `getStroke` that will generate the points for a polygon based on an array of points.
+
+![Screenshot](doc/assets/process.gif "A GIF showing a stroke's input points, outline points, and a curved path connecting these points")
+
+To do this work, `getStroke` first creates a set of spline points (red) based on the input points (grey) and then creates outline points (blue). You can render the result any way you like, using whichever technology you prefer.
+
+## Installation
+
+This package is available on [pub.dev](https://pub.dev/packages/perfect_freehand). It can be used with or without Flutter.
+
+With Dart:
+
+```bash
+dart pub add perfect_freehand
+```
+
+With Flutter:
+
+```bash
+flutter pub add perfect_freehand
+```
+
+See [here](https://pub.dev/packages/perfect_freehand/install) for more.
 
 ## Usage
 
@@ -176,13 +201,20 @@ final myOutlinePoints = getStrokeOutlinePoints(myStrokePoints, size: 16)
 
 **Note:** Internally, the `getStroke` function passes the result of `getStrokePoints` to `getStrokeOutlinePoints`, just as shown in this example. This means that, in this example, the result of `myOutlinePoints` will be the same as if the `myPoints` List had been passed to `getStroke`.
 
-## Support
+## Community
 
-Please [open an issue](https://github.com/steveruizok/perfect-freehand-dart/issues/new) for support.
+### Support
 
-## Discussion
+Need help? Please [open an issue](https://github.com/steveruizok/perfect-freehand-dart/issues/new) for support.
+
+### Discussion
 
 Have an idea or casual question? Visit the [discussion page](https://github.com/steveruizok/perfect-freehand-dart/discussions).
+
+### License
+
+- MIT
+- ...but if you're using `perfect-freehand` in a commercial product, consider [becoming a sponsor](https://github.com/sponsors/steveruizok?frequency=recurring&sponsor=steveruizok). 💰
 
 ## Author
 
