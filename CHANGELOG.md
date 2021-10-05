@@ -1,3 +1,7 @@
+## 1.0.4
+
+- One more fix to README.
+
 ## 1.0.3
 
 - Pub score optimizations.

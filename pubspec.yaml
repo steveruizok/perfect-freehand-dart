@@ -1,5 +1,5 @@
 name: perfect_freehand
-version: 1.0.3
+version: 1.0.4
 description: Draw perfect pressure-sensitive freehand lines. A set of functions for turning input points into a polygon of outline points.
 homepage: https://github.com/steveruizok/perfect-freehand-dart
 repository: https://github.com/steveruizok/perfect-freehand-dart
