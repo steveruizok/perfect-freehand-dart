@@ -4,7 +4,7 @@ Draw perfect pressure-sensitive freehand lines.
 
 🔗 A port of the [perfect-freehand](https://github/steveruizok/perfect-freehand) JavaScript library. [Try out that demo](https://perfect-freehand-example.vercel.app/).
 
-💰 Using this library in a commercial product? Consider [becoming a sponsor](https://github.com/sponsors/steveruizok?frequency=recurring&sponsor=steveruizok).
+💕 Love this library? Consider [becoming a sponsor](https://github.com/sponsors/steveruizok?frequency=recurring&sponsor=steveruizok).
 
 ## Table of Contents
 
