@@ -1,6 +1,8 @@
 ## 1.0.3
 
 - Pub score optimizations.
+- Improve README.
+- Add FUNDING.
 
 ## 1.0.2
 
