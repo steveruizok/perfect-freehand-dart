@@ -1,24 +1,30 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
-import "sketcher.dart";
-import "stroke.dart";
+import 'sketcher.dart';
+import 'stroke.dart';
 import 'stroke_options.dart';
 
 class DrawingPage extends StatefulWidget {
-  const DrawingPage({Key? key}) : super(key: key);
+  const DrawingPage({Key? key, this.outCallback, required this.canvasSize})
+      : super(key: key);
+
+  final Function? outCallback;
+  final Size canvasSize;
 
   @override
-  _DrawingPageState createState() => _DrawingPageState();
+  State<DrawingPage> createState() => DrawingPageState();
 }
 
-class _DrawingPageState extends State<DrawingPage> {
+class DrawingPageState extends State<DrawingPage> {
   List<Stroke> lines = <Stroke>[];
 
   Stroke? line;
+  bool enabled = true;
 
   StrokeOptions options = StrokeOptions();
 
@@ -32,7 +38,35 @@ class _DrawingPageState extends State<DrawingPage> {
     setState(() {
       lines = [];
       line = null;
+      enabled = true;
     });
+  }
+
+  Future<void> image(BuildContext context) async {
+    final image = await toImage();
+    final futureBytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = futureBytes!.buffer.asUint8List();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          elevation: 1,
+          insetPadding: const EdgeInsets.all(32.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: SizedBox(
+              height: 500,
+              width: 500,
+              child: Image.memory(pngBytes),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> updateSizeOption(double size) async {
@@ -42,26 +76,35 @@ class _DrawingPageState extends State<DrawingPage> {
   }
 
   void onPanStart(DragStartDetails details) {
+    if (details.kind == PointerDeviceKind.stylus) {}
     final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
-    final point = Point(offset.dx, offset.dy);
-    final points = [point];
-    line = Stroke(points);
-    currentLineStreamController.add(line!);
+    if (checkPoint(
+        Point(details.localPosition.dx, details.localPosition.dy), box.size)) {
+      final offset = box.globalToLocal(details.globalPosition);
+      final point = Point(offset.dx, offset.dy);
+      final points = [point];
+      line = Stroke(points);
+      currentLineStreamController.add(line!);
+    }
   }
 
   void onPanUpdate(DragUpdateDetails details) {
     final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
-    final point = Point(offset.dx, offset.dy);
-    final points = [...line!.points, point];
-    line = Stroke(points);
-    currentLineStreamController.add(line!);
+    if (checkPoint(
+        Point(details.localPosition.dx, details.localPosition.dy), box.size)) {
+      final offset = box.globalToLocal(details.globalPosition);
+      final point = Point(offset.dx, offset.dy);
+      final points = [...line!.points, point];
+      line = Stroke(points);
+      currentLineStreamController.add(line!);
+    }
   }
 
   void onPanEnd(DragEndDetails details) {
-    lines = List.from(lines)..add(line!);
-    linesStreamController.add(lines);
+    if (enabled) {
+      lines = List.from(lines)..add(line!);
+      linesStreamController.add(lines);
+    }
   }
 
   Widget buildCurrentPath(BuildContext context) {
@@ -71,28 +114,31 @@ class _DrawingPageState extends State<DrawingPage> {
       onPanEnd: onPanEnd,
       child: RepaintBoundary(
         child: Container(
-            color: Colors.transparent,
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: StreamBuilder<Stroke>(
-                stream: currentLineStreamController.stream,
-                builder: (context, snapshot) {
-                  return CustomPaint(
-                    painter: Sketcher(
-                      lines: line == null ? [] : [line!],
-                      options: options,
-                    ),
-                  );
-                })),
+          color: Colors.transparent,
+          width: double.infinity,
+          height: double.infinity,
+          child: StreamBuilder<Stroke>(
+            stream: currentLineStreamController.stream,
+            builder: (context, snapshot) {
+              return CustomPaint(
+                painter: Sketcher(
+                  lines: line == null ? [] : [line!],
+                  options: options,
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 
   Widget buildAllPaths(BuildContext context) {
     return RepaintBoundary(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
+      child: Container(
+        color: Colors.transparent,
+        width: double.infinity,
+        height: double.infinity,
         child: StreamBuilder<List<Stroke>>(
           stream: linesStreamController.stream,
           builder: (context, snapshot) {
@@ -224,22 +270,41 @@ class _DrawingPageState extends State<DrawingPage> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
-              buildClearButton(),
+              buildButtons(context),
             ]));
   }
 
-  Widget buildClearButton() {
-    return GestureDetector(
-      onTap: clear,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: const CircleAvatar(
-            child: Icon(
-          Icons.replay,
-          size: 20.0,
-          color: Colors.white,
-        )),
-      ),
+  Widget buildButtons(BuildContext context) {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () {
+            image(context);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: const CircleAvatar(
+                child: Icon(
+              Icons.image,
+              size: 20.0,
+              color: Colors.white,
+            )),
+          ),
+        ),
+        VerticalDivider(width: 30),
+        GestureDetector(
+          onTap: clear,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: const CircleAvatar(
+                child: Icon(
+              Icons.replay,
+              size: 20.0,
+              color: Colors.white,
+            )),
+          ),
+        )
+      ],
     );
   }
 
@@ -262,5 +327,32 @@ class _DrawingPageState extends State<DrawingPage> {
     linesStreamController.close();
     currentLineStreamController.close();
     super.dispose();
+  }
+
+  bool isValidPoint(Point p, Size s) {
+    bool result = p.x > 0 && p.y > 0 && p.x < s.width && p.y < s.height;
+    return result;
+  }
+
+  bool checkPoint(Point p, Size s) {
+    bool isValid = isValidPoint(p, s);
+    if (!isValid && enabled && widget.outCallback != null) {
+      enabled = false;
+      widget.outCallback!();
+    }
+    return enabled && isValid;
+  }
+
+  Future<ui.Image> toImage() async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+
+    final ui.Canvas canvas = Canvas(recorder);
+
+    final sketcher = Sketcher(lines: lines, options: options);
+    final size = widget.canvasSize;
+    sketcher.paint(canvas, size);
+
+    final ui.Picture picture = recorder.endRecording();
+    return picture.toImage(size.width.toInt(), size.height.toInt());
   }
 }
