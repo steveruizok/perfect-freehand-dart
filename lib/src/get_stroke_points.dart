@@ -70,7 +70,8 @@ List<StrokePoint> getStrokePoints(
     if (isComplete && i == pts.length - 1) {
       point = pts[i];
     } else {
-      point = lrp(prev.point, pts[i], t);
+      final tempPoint = lrp(prev.point, pts[i], t);
+      point = Point(tempPoint.x, tempPoint.y, pts[i].p);
     }
 
     if (isEqual(point, prev.point)) {

@@ -118,14 +118,12 @@ List<Point> getStrokeOutlinePoints(
           1,
           prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange),
         );
-        radius = getStrokeRadius(
-          size,
-          thinning,
-          pressure,
-        );
-      } else {
-        radius = size / 2;
       }
+      radius = getStrokeRadius(
+        size,
+        thinning,
+        pressure,
+      );
     }
 
     firstRadius ??= radius;
