@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
+import 'drag_details.dart';
 import 'sketcher.dart';
 import 'stroke.dart';
 import 'stroke_options.dart';
@@ -27,6 +27,7 @@ class DrawingPageState extends State<DrawingPage> {
   bool enabled = true;
 
   StrokeOptions options = StrokeOptions();
+  ui.PointerDeviceKind? kind;
 
   StreamController<Stroke> currentLineStreamController =
       StreamController<Stroke>.broadcast();
@@ -39,6 +40,7 @@ class DrawingPageState extends State<DrawingPage> {
       lines = [];
       line = null;
       enabled = true;
+      kind = null;
     });
   }
 
@@ -75,32 +77,31 @@ class DrawingPageState extends State<DrawingPage> {
     });
   }
 
-  void onPanStart(DragStartDetails details) {
-    if (details.kind == PointerDeviceKind.stylus) {}
+  void onTouchEventStart(DragDetails details) {
     final box = context.findRenderObject() as RenderBox;
     if (checkPoint(
         Point(details.localPosition.dx, details.localPosition.dy), box.size)) {
-      final offset = box.globalToLocal(details.globalPosition);
-      final point = Point(offset.dx, offset.dy);
+      final offset = details.localPosition;
+      Point point = Point(offset.dx, offset.dy, details.pressure);
       final points = [point];
       line = Stroke(points);
       currentLineStreamController.add(line!);
     }
   }
 
-  void onPanUpdate(DragUpdateDetails details) {
+  void onTouchEventUpdate(DragDetails details) {
     final box = context.findRenderObject() as RenderBox;
     if (checkPoint(
         Point(details.localPosition.dx, details.localPosition.dy), box.size)) {
-      final offset = box.globalToLocal(details.globalPosition);
-      final point = Point(offset.dx, offset.dy);
+      final offset = details.localPosition;
+      final point = Point(offset.dx, offset.dy, details.pressure);
       final points = [...line!.points, point];
       line = Stroke(points);
       currentLineStreamController.add(line!);
     }
   }
 
-  void onPanEnd(DragEndDetails details) {
+  void onTouchEventEnd() {
     if (enabled) {
       lines = List.from(lines)..add(line!);
       linesStreamController.add(lines);
@@ -108,28 +109,54 @@ class DrawingPageState extends State<DrawingPage> {
   }
 
   Widget buildCurrentPath(BuildContext context) {
-    return GestureDetector(
-      onPanStart: onPanStart,
-      onPanUpdate: onPanUpdate,
-      onPanEnd: onPanEnd,
-      child: RepaintBoundary(
-        child: Container(
-          color: Colors.transparent,
-          width: double.infinity,
-          height: double.infinity,
-          child: StreamBuilder<Stroke>(
-            stream: currentLineStreamController.stream,
-            builder: (context, snapshot) {
-              return CustomPaint(
-                painter: Sketcher(
-                  lines: line == null ? [] : [line!],
-                  options: options,
-                ),
-              );
-            },
-          ),
+    final child = RepaintBoundary(
+      child: Container(
+        color: Colors.transparent,
+        width: double.infinity,
+        height: double.infinity,
+        child: StreamBuilder<Stroke>(
+          stream: currentLineStreamController.stream,
+          builder: (context, snapshot) {
+            return CustomPaint(
+              painter: Sketcher(
+                lines: line == null ? [] : [line!],
+                options: options,
+              ),
+            );
+          },
         ),
       ),
+    );
+
+    return Listener(
+      onPointerDown: (event) {
+        if (kind == ui.PointerDeviceKind.stylus &&
+            event.kind == ui.PointerDeviceKind.touch) {
+          return;
+        }
+        if (kind == ui.PointerDeviceKind.touch &&
+            event.kind == ui.PointerDeviceKind.stylus) {
+          clear();
+        }
+        kind = event.kind;
+        onTouchEventStart(DragDetails.withPointer(event));
+      },
+      onPointerMove: (event) {
+        if (kind == ui.PointerDeviceKind.stylus &&
+            event.kind == ui.PointerDeviceKind.touch) {
+          return;
+        }
+        kind = event.kind;
+        onTouchEventUpdate(DragDetails.withPointer(event));
+      },
+      onPointerUp: (event) {
+        if (kind == ui.PointerDeviceKind.stylus &&
+            event.kind == ui.PointerDeviceKind.touch) {
+          return;
+        }
+        onTouchEventEnd();
+      },
+      child: child,
     );
   }
 
@@ -265,11 +292,19 @@ class DrawingPageState extends State<DrawingPage> {
                         })
                       }),
               const Text(
-                'Clear',
+                'Simulate pressure',
                 textAlign: TextAlign.start,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
+              Checkbox(
+                  value: options.simulatePressure,
+                  onChanged: (status) {
+                    clear();
+                    setState(() {
+                      options = StrokeOptions(simulatePressure: status!);
+                    });
+                  }),
               buildButtons(context),
             ]));
   }
@@ -277,33 +312,51 @@ class DrawingPageState extends State<DrawingPage> {
   Widget buildButtons(BuildContext context) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () {
-            image(context);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: const CircleAvatar(
-                child: Icon(
-              Icons.image,
-              size: 20.0,
-              color: Colors.white,
-            )),
+        Column(children: [
+          const Text(
+            'Picture',
+            textAlign: TextAlign.start,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           ),
-        ),
+          GestureDetector(
+            onTap: () {
+              image(context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: const CircleAvatar(
+                  child: Icon(
+                Icons.image,
+                size: 20.0,
+                color: Colors.white,
+              )),
+            ),
+          ),
+        ]),
         VerticalDivider(width: 30),
-        GestureDetector(
-          onTap: clear,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: const CircleAvatar(
-                child: Icon(
-              Icons.replay,
-              size: 20.0,
-              color: Colors.white,
-            )),
-          ),
-        )
+        Column(
+          children: [
+            const Text(
+              'Clear',
+              textAlign: TextAlign.start,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+            GestureDetector(
+              onTap: clear,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: const CircleAvatar(
+                    child: Icon(
+                  Icons.replay,
+                  size: 20.0,
+                  color: Colors.white,
+                )),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
