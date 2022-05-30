@@ -17,5 +17,7 @@ class DragDetails {
   DragDetails.withPointer(PointerEvent pointerEvent)
       : localPosition = pointerEvent.localPosition,
         kind = pointerEvent.kind,
-        pressure = pointerEvent.pressure / pointerEvent.pressureMax;
+        pressure = pointerEvent.pressureMax != 0
+            ? pointerEvent.pressure / pointerEvent.pressureMax
+            : 0.5;
 }
