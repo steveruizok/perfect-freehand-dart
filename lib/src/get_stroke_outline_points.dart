@@ -124,7 +124,11 @@ List<Point> getStrokeOutlinePoints(
           pressure,
         );
       } else {
-        radius = size / 2;
+        radius = getStrokeRadius(
+          size,
+          thinning,
+          pressure,
+        );
       }
     }
 

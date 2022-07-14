@@ -71,6 +71,11 @@ List<StrokePoint> getStrokePoints(
       point = pts[i];
     } else {
       point = lrp(prev.point, pts[i], t);
+
+      if (!simulatePressure) {
+        // Use real pressure.
+        point = Point(point.x, point.y, pts[i].p);
+      }
     }
 
     if (isEqual(point, prev.point)) {
