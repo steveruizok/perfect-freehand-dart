@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
 import "sketcher.dart";
@@ -22,11 +22,9 @@ class _DrawingPageState extends State<DrawingPage> {
 
   StrokeOptions options = StrokeOptions();
 
-  StreamController<Stroke> currentLineStreamController =
-      StreamController<Stroke>.broadcast();
+  StreamController<Stroke> currentLineStreamController = StreamController<Stroke>.broadcast();
 
-  StreamController<List<Stroke>> linesStreamController =
-      StreamController<List<Stroke>>.broadcast();
+  StreamController<List<Stroke>> linesStreamController = StreamController<List<Stroke>>.broadcast();
 
   Future<void> clear() async {
     setState(() {
@@ -41,34 +39,56 @@ class _DrawingPageState extends State<DrawingPage> {
     });
   }
 
-  void onPanStart(DragStartDetails details) {
+  void onPointerDown(PointerDownEvent details) {
+    options = StrokeOptions(
+      simulatePressure: details.kind != PointerDeviceKind.stylus,
+    );
+
     final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
-    final point = Point(offset.dx, offset.dy);
+    final offset = box.globalToLocal(details.position);
+    late final Point point;
+    if (details.kind == PointerDeviceKind.stylus) {
+      point = Point(
+        offset.dx,
+        offset.dy,
+        (details.pressure - details.pressureMin) / (details.pressureMax - details.pressureMin),
+      );
+    } else {
+      point = Point(offset.dx, offset.dy);
+    }
     final points = [point];
     line = Stroke(points);
     currentLineStreamController.add(line!);
   }
 
-  void onPanUpdate(DragUpdateDetails details) {
+  void onPointerMove(PointerMoveEvent details) {
     final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.globalPosition);
-    final point = Point(offset.dx, offset.dy);
+    final offset = box.globalToLocal(details.position);
+    late final Point point;
+    if (details.kind == PointerDeviceKind.stylus) {
+      point = Point(
+        offset.dx,
+        offset.dy,
+        (details.pressure - details.pressureMin) / (details.pressureMax - details.pressureMin),
+      );
+    } else {
+      point = Point(offset.dx, offset.dy);
+    }
     final points = [...line!.points, point];
     line = Stroke(points);
     currentLineStreamController.add(line!);
   }
 
-  void onPanEnd(DragEndDetails details) {
+  void onPointerUp(PointerUpEvent details) {
     lines = List.from(lines)..add(line!);
     linesStreamController.add(lines);
   }
 
   Widget buildCurrentPath(BuildContext context) {
-    return GestureDetector(
-      onPanStart: onPanStart,
-      onPanUpdate: onPanUpdate,
-      onPanEnd: onPanEnd,
+    return Listener(
+      onPointerDown: onPointerDown,
+      onPointerMove: onPointerMove,
+      onPointerUp: onPointerUp,
       child: RepaintBoundary(
         child: Container(
             color: Colors.transparent,
@@ -248,11 +268,7 @@ class _DrawingPageState extends State<DrawingPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
-        children: [
-          buildAllPaths(context),
-          buildCurrentPath(context),
-          buildToolbar()
-        ],
+        children: [buildAllPaths(context), buildCurrentPath(context), buildToolbar()],
       ),
     );
   }
