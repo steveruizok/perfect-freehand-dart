@@ -276,10 +276,10 @@ List<Point> getStrokeOutlinePoints(
     } else if (capEnd) {
       final start = prj(lastPoint, direction, radius);
 
-      const step = 1 / 29;
+      const step = pi / 10;
 
-      for (double t = 0; t <= 1; t += step) {
-        endCap.add(rotAround(start, lastPoint, pi * 3 * t));
+      for (double t = 0; t <= pi; t += step) {
+        endCap.add(rotAround(start, lastPoint, t));
       }
     } else {
       endCap.addAll([
