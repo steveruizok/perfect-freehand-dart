@@ -56,7 +56,9 @@ List<PointVector> myPoints = [
 final stroke = getStroke(myPoints);
 ```
 
-You may also provide options:
+You may also provide options to `getStroke`.
+You'll most likely store the `StrokeOptions` object in a variable,
+but you can also pass it directly to `getStroke`.
 
 ```dart
 final stroke = getStroke(
