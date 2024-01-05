@@ -81,9 +81,15 @@ class StrokeEasings {
 
 /// Stroke options for the start/end of the line.
 class StrokeEndOptions {
+  /// Whether to cap the line.
   bool? cap;
+
+  /// Whether to taper the start of the line.
   bool? taperEnabled;
+
+  /// A custom taper value for the start of the line, defaults to the total running length.
   double? customTaper;
+
   double Function(double)? easing;
 
   StrokeEndOptions({

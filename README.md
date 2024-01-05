@@ -2,7 +2,8 @@
 
 Draw perfect pressure-sensitive freehand lines.
 
-🔗 A port of the [perfect-freehand](https://github.com/steveruizok/perfect-freehand) JavaScript library. [Try out that demo](https://perfect-freehand-example.vercel.app/).
+🔗 A port of the [perfect-freehand](https://github.com/steveruizok/perfect-freehand) JavaScript library.
+[Try out the demo](https://steveruizok.github.io/perfect-freehand-dart/)!
 
 💕 Love this library? Consider becoming a sponsor for
 [steveruizok](https://github.com/sponsors/steveruizok)
@@ -15,7 +16,6 @@ Draw perfect pressure-sensitive freehand lines.
 - [Installation](#installation)
 - [Usage](#usage)
 - [Community](#community)
-- [Author](#author)
 
 ## Introduction
 
@@ -27,15 +27,9 @@ To do this work, `getStroke` first creates a set of spline points (red) based on
 
 ## Installation
 
-This package is available on [pub.dev](https://pub.dev/packages/perfect_freehand). It can be used with or without Flutter.
-
-With Dart:
-
-```bash
-dart pub add perfect_freehand
-```
-
-With Flutter:
+This package is available on [pub.dev](https://pub.dev/packages/perfect_freehand)
+and requires Flutter.
+If you're using Dart without Flutter, check out versions `1.x.x` of this package.
 
 ```bash
 flutter pub add perfect_freehand
@@ -53,121 +47,90 @@ This package exports a function named `getStroke` that:
 ```dart
 import 'package:perfect_freehand/perfect_freehand.dart';
 
-List<Point> myPoints = [
-  Point(0, 0),
-  Point(1, 2),
+List<PointVector> myPoints = [
+  PointVector(0, 0),
+  PointVector(1, 2),
   // etc...
 ];
 
 final stroke = getStroke(myPoints);
 ```
 
-You may also provide options as named parameters:
+You may also provide options:
 
 ```dart
 final stroke = getStroke(
   myPoints,
-  size: 16,
-  thinning: 0.7,
-  smoothing: 0.5,
-  streamline: 0.5,
-  taperStart: 0.0,
-  taperEnd: 0.0,
-  capStart: true,
-  capEnd: true,
-  simulatePressure: true,
-  isComplete: false,
+  StrokeOptions(
+    size: 16,
+    thinning: 0.7,
+    smoothing: 0.5,
+    streamline: 0.5,
+    simulatePressure: true,
+    start: StrokeEndOptions(
+      cap: true,
+      taperEnabled: true,
+    ),
+    end: StrokeEndOptions(
+      cap: true,
+      taperEnabled: true,
+    ),
+    isComplete: false,
+  ),
 );
 ```
 
 To use real pressure, provide each point's pressure as a third parameter.
 
 ```dart
-List<Point> myPoints = [
-  Point(0, 0, 0.2),
-  Point(1, 2, 0.3),
-  Point(2, 4, 0.4),
+List<PointVector> myPoints = [
+  PointVector(0, 0, 0.2),
+  PointVector(1, 2, 0.3),
+  PointVector(2, 4, 0.4),
   // etc...
 ];
 
-final stroke = getStroke(myPoints, simulatePressure: false);
+final stroke = getStroke(
+  myPoints,
+  StrokeOptions(
+    simulatePressure: false,
+  ),
+);
 ```
 
 ### Options
 
-The optional parameters are:
+You can customize the stroke by passing a `StrokeOptions` object as the second parameter to `getStroke`.
+This object accepts the following properties:
 
-| Property           | Type    | Default | Description                                                                                                |
-| ------------------ | ------- | ------- | ---------------------------------------------------------------------------------------------------------- |
-| `size`             | double  | 16      | The base size (diameter) of the stroke.                                                                    |
-| `thinning`         | double  | .5      | The effect of pressure on the stroke's size.                                                               |
-| `smoothing`        | double  | .5      | How much to soften the stroke's edges.                                                                     |
-| `streamline`       | double  | .5      | How much to remove variation from the input points.                                                        |
-| `startTaper`       | double  | 0       | How far to taper the start of the line.                                                                    |
-| `endTaper`         | double  | 0       | How far to taper the end of the line.                                                                      |
-| `isComplete`       | boolean | true    | Whether the stroke is complete.                                                                            |
-| `simulatePressure` | boolean | true    | Whether to simulate pressure based on distance between points, or else use the provided Points' pressures. |
+| Property             | Type             | Default | Description                                                                                                      |
+| -------------------- | ---------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
+| `size`               | double           | 16      | The base size (diameter) of the stroke.                                                                          |
+| `thinning`           | double           | .5      | The effect of pressure on the stroke's size.                                                                     |
+| `smoothing`          | double           | .5      | How much to soften the stroke's edges.                                                                           |
+| `streamline`         | double           | .5      | How much to remove variation from the input points.                                                              |
+| `simulatePressure`   | bool             | true    | Whether to simulate pressure based on distance between points, or else use the provided PointVectors' pressures. |
+| `isComplete`         | bool             | true    | Whether the stroke is complete.                                                                                  |
+| `start`              | StrokeEndOptions |         | How far to taper the start of the line.                                                                          |
+| `end     `           | StrokeEndOptions |         | How far to taper the end of the line.                                                                            |
+| `start.cap`          | bool             | true    | Whether to cap the start of the line.                                                                            |
+| `start.taperEnabled` | bool             | false   | Whether to taper the start of the line.                                                                          |
+| `start.customTaper`  | double           |         | A custom taper value for the start of the line, defaults to the total running length.                            |
 
-**Note:** When the `last` property is `true`, the line's end will be drawn at the last input point, rather than slightly behind it.
-
-**Note:** The `cap` property has no effect when `taper` is more than zero.
-
-**Tip:** To create a stroke with a steady line, set the `thinning` option to `0`.
-
-**Tip:** To create a stroke that gets thinner with pressure instead of thicker, use a negative number for the `thinning` option.
+Notes:
+- When the `isComplete` property is `true`, the line's end will be drawn at the last input point, rather than slightly behind it.
+- The `StrokeEndOptions.cap` property has no effect when `StrokeEndOptions.taperEnabled` is `true`.
+- To create a stroke with a constant width, set the `thinning` option to `0`.
+- To create a stroke that gets thinner with pressure instead of thicker, use a negative number for the `thinning` option.
 
 ### Rendering
 
-While `getStroke` returns an array of points representing the outline of a stroke, it's up to you to decide how you will render these points. Check the **example project** to see how you might draw these points in Flutter using a `CustomPainter`.
+While `getStroke` returns an array of points representing the outline of a stroke, it's up to you to decide how you will render these points.
 
-```dart
-import 'package:flutter/material.dart';
-import 'package:perfect_freehand/perfect_freehand.dart';
-
-class StrokePainter extends CustomPainter {
-  final List<Point> points;
-
-  StrokePainter({ required this.points });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint = Paint() ..color = Colors.black;
-
-    // 1. Get the outline points from the input points
-    final outlinePoints = getStroke(points);
-
-    // 2. Render the points as a path
-    final path = Path();
-
-    if (outlinePoints.isEmpty) {
-      // If the list is empty, don't do anything.
-      return;
-    } else if (outlinePoints.length < 2) {
-      // If the list only has one point, draw a dot.
-      path.addOval(Rect.fromCircle(
-          center: Offset(outlinePoints[0].x, outlinePoints[0].y), radius: 1));
-    } else {
-      // Otherwise, draw a line that connects each point with a bezier curve segment.
-      path.moveTo(outlinePoints[0].x, outlinePoints[0].y);
-
-      for (int i = 1; i < outlinePoints.length - 1; ++i) {
-        final p0 = outlinePoints[i];
-        final p1 = outlinePoints[i + 1];
-        path.quadraticBezierTo(
-            p0.x, p0.y, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
-      }
-    }
-
-    // 3. Draw the path to the canvas
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(StrokePainter oldDelegate) {
-    return true;
-  }
-}
-```
+See the example project to see how you might draw these points in Flutter. The main files are:
+- [stroke.dart](https://github.com/steveruizok/perfect-freehand-dart/blob/main/example/lib/stroke.dart), a class to hold a list of points
+- [sketcher.dart](https://github.com/steveruizok/perfect-freehand-dart/blob/main/example/lib/sketcher.dart), the `CustomPainter` that draws the strokes
+- [drawing_page.dart](https://github.com/steveruizok/perfect-freehand-dart/blob/main/example/lib/sketcher.dart), the demo page that contains all the logic
 
 ### Advanced Usage
 
@@ -175,16 +138,19 @@ For advanced usage, the library also exports smaller functions that `getStroke` 
 
 #### `getStrokePoints`
 
-A function that accepts an array of Points and returns a set of `StrokePoints`. The path's total length will be the `runningLength` of the last point in the array. Like `getStroke`, this function also accepts any of the [optional named parameters](#options) listed above.
+A function that accepts an array of `PointVector`s and returns a set of `StrokePoints`. The path's total length will be the `runningLength` of the last point in the array. Like `getStroke`, this function also accepts any of the [optional named parameters](#options) listed above.
 
 ```dart
-List<Point> myPoints = [
-  Point(0, 0),
-  Point(1, 2),
+List<PointVector> myPoints = [
+  PointVector(0, 0),
+  PointVector(1, 2),
   // etc...
 ];
+final options = StrokeOptions(
+  size: 16,
+);
 
-final strokePoints = getStrokePoints(myPoints, size: 16);
+final strokePoints = getStrokePoints(myPoints, options);
 ```
 
 #### `getOutlinePoints`
@@ -192,15 +158,18 @@ final strokePoints = getStrokePoints(myPoints, size: 16);
 A function that accepts an array of StrokePoints (i.e. the output of `getStrokePoint`) and returns an array of Points defining the outline of a stroke. Like `getStroke`, this function also accepts any of the [optional named parameters](#options) listed above.
 
 ```dart
-List<Point> myPoints = [
-  Point(0, 0),
-  Point(1, 2),
+List<PointVector> myPoints = [
+  PointVector(0, 0),
+  PointVector(1, 2),
   // etc...
 ];
+final options = StrokeOptions(
+  size: 16,
+);
 
-final myStrokePoints = getStrokePoints(myPoints, size: 16);
+final myStrokePoints = getStrokePoints(myPoints, options);
 
-final myOutlinePoints = getStrokeOutlinePoints(myStrokePoints, size: 16)
+final myOutlinePoints = getStrokeOutlinePoints(myStrokePoints, options);
 ```
 
 **Note:** Internally, the `getStroke` function passes the result of `getStrokePoints` to `getStrokeOutlinePoints`, just as shown in this example. This means that, in this example, the result of `myOutlinePoints` will be the same as if the `myPoints` List had been passed to `getStroke`.
@@ -218,8 +187,9 @@ Have an idea or casual question? Visit the [discussion page](https://github.com/
 ### License
 
 - MIT
-- ...but if you're using `perfect-freehand` in a commercial product, consider [becoming a sponsor](https://github.com/sponsors/steveruizok?frequency=recurring&sponsor=steveruizok). 💰
-
-## Author
-
-- [@steveruizok](https://twitter.com/steveruizok)
+- ...but if you're using `perfect-freehand` in a commercial product,
+    consider becoming a sponsor for
+    [steveruizok](https://github.com/sponsors/steveruizok)
+    (the author of the original JavaScript library) or
+    [adil192](https://github.com/sponsors/adil192)
+    (the maintainer of the Dart package).. 💰
