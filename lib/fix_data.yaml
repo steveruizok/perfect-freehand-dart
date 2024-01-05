@@ -1,0 +1,29 @@
+version: 1
+transforms:
+  - title: 'Replace Point with PointVector'
+    date: 2023-10-04
+    element:
+      uris:
+        - 'point.dart'
+        - 'src/point.dart'
+        - 'package:perfect_freehand/src/point.dart'
+        - 'perfect_freehand.dart'
+        - 'package:perfect_freehand/perfect_freehand.dart'
+      class: 'Point'
+    changes:
+      - kind: 'rename'
+        newName: 'PointVector'
+  - title: 'Replace PointVector.p with PointVector.pressure'
+    date: 2023-10-04
+    element:
+      uris:
+        - 'point.dart'
+        - 'src/point.dart'
+        - 'package:perfect_freehand/src/point.dart'
+        - 'perfect_freehand.dart'
+        - 'package:perfect_freehand/perfect_freehand.dart'
+      field: 'p'
+      inClass: 'PointVector'
+    changes:
+      - kind: 'rename'
+        newName: 'pressure'

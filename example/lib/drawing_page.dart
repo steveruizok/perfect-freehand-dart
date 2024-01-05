@@ -6,13 +6,12 @@ import 'package:perfect_freehand/perfect_freehand.dart';
 
 import "sketcher.dart";
 import "stroke.dart";
-import 'stroke_options.dart';
 
 class DrawingPage extends StatefulWidget {
   const DrawingPage({Key? key}) : super(key: key);
 
   @override
-  _DrawingPageState createState() => _DrawingPageState();
+  State<DrawingPage> createState() => _DrawingPageState();
 }
 
 class _DrawingPageState extends State<DrawingPage> {
@@ -20,7 +19,26 @@ class _DrawingPageState extends State<DrawingPage> {
 
   Stroke? line;
 
-  StrokeOptions options = StrokeOptions();
+  static StrokeOptions defaultOptions = StrokeOptions(
+    size: 16,
+    thinning: 0.7,
+    smoothing: 0.5,
+    streamline: 0.5,
+    start: StrokeEndOptions(
+      taperEnabled: true,
+      customTaper: 0.0,
+      cap: true,
+    ),
+    end: StrokeEndOptions(
+      taperEnabled: true,
+      customTaper: 0.0,
+      cap: true,
+    ),
+    simulatePressure: true,
+    isComplete: false,
+  );
+
+  StrokeOptions options = defaultOptions.copyWith();
 
   StreamController<Stroke> currentLineStreamController = StreamController<Stroke>.broadcast();
 
@@ -40,21 +58,21 @@ class _DrawingPageState extends State<DrawingPage> {
   }
 
   void onPointerDown(PointerDownEvent details) {
-    options = StrokeOptions(
+    options = options.copyWith(
       simulatePressure: details.kind != PointerDeviceKind.stylus,
     );
 
     final box = context.findRenderObject() as RenderBox;
     final offset = box.globalToLocal(details.position);
-    late final Point point;
+    late final PointVector point;
     if (details.kind == PointerDeviceKind.stylus) {
-      point = Point(
+      point = PointVector(
         offset.dx,
         offset.dy,
         (details.pressure - details.pressureMin) / (details.pressureMax - details.pressureMin),
       );
     } else {
-      point = Point(offset.dx, offset.dy);
+      point = PointVector(offset.dx, offset.dy);
     }
     final points = [point];
     line = Stroke(points);
@@ -64,15 +82,15 @@ class _DrawingPageState extends State<DrawingPage> {
   void onPointerMove(PointerMoveEvent details) {
     final box = context.findRenderObject() as RenderBox;
     final offset = box.globalToLocal(details.position);
-    late final Point point;
+    late final PointVector point;
     if (details.kind == PointerDeviceKind.stylus) {
-      point = Point(
+      point = PointVector(
         offset.dx,
         offset.dy,
         (details.pressure - details.pressureMin) / (details.pressureMax - details.pressureMin),
       );
     } else {
-      point = Point(offset.dx, offset.dy);
+      point = PointVector(offset.dx, offset.dy);
     }
     final points = [...line!.points, point];
     line = Stroke(points);
@@ -143,11 +161,11 @@ class _DrawingPageState extends State<DrawingPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                  value: options.size,
+                  value: options.size!,
                   min: 1,
                   max: 50,
                   divisions: 100,
-                  label: options.size.round().toString(),
+                  label: options.size!.round().toString(),
                   onChanged: (double value) => {
                         setState(() {
                           options.size = value;
@@ -160,11 +178,11 @@ class _DrawingPageState extends State<DrawingPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                  value: options.thinning,
+                  value: options.thinning!,
                   min: -1,
                   max: 1,
                   divisions: 100,
-                  label: options.thinning.toStringAsFixed(2),
+                  label: options.thinning!.toStringAsFixed(2),
                   onChanged: (double value) => {
                         setState(() {
                           options.thinning = value;
@@ -177,11 +195,11 @@ class _DrawingPageState extends State<DrawingPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                  value: options.streamline,
+                  value: options.streamline!,
                   min: 0,
                   max: 1,
                   divisions: 100,
-                  label: options.streamline.toStringAsFixed(2),
+                  label: options.streamline!.toStringAsFixed(2),
                   onChanged: (double value) => {
                         setState(() {
                           options.streamline = value;
@@ -194,11 +212,11 @@ class _DrawingPageState extends State<DrawingPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                  value: options.smoothing,
+                  value: options.smoothing!,
                   min: 0,
                   max: 1,
                   divisions: 100,
-                  label: options.smoothing.toStringAsFixed(2),
+                  label: options.smoothing!.toStringAsFixed(2),
                   onChanged: (double value) => {
                         setState(() {
                           options.smoothing = value;
@@ -211,14 +229,14 @@ class _DrawingPageState extends State<DrawingPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                  value: options.taperStart,
+                  value: options.start!.customTaper!,
                   min: 0,
                   max: 100,
                   divisions: 100,
-                  label: options.taperStart.toStringAsFixed(2),
+                  label: options.start!.customTaper!.toStringAsFixed(2),
                   onChanged: (double value) => {
                         setState(() {
-                          options.taperStart = value;
+                          options.start!.customTaper = value;
                         })
                       }),
               const Text(
@@ -228,14 +246,14 @@ class _DrawingPageState extends State<DrawingPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                  value: options.taperEnd,
+                  value: options.end!.customTaper!,
                   min: 0,
                   max: 100,
                   divisions: 100,
-                  label: options.taperEnd.toStringAsFixed(2),
+                  label: options.end!.customTaper!.toStringAsFixed(2),
                   onChanged: (double value) => {
                         setState(() {
-                          options.taperEnd = value;
+                          options.end!.customTaper = value;
                         })
                       }),
               const Text(
