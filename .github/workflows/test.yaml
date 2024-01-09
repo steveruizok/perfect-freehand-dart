@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+          key: ${{ runner.OS }}-perfect-freehand-${{ hashFiles('**/pubspec.lock') }}-${{ hashFiles('**/*.dart') }}
+          restore-keys: |
+            ${{ runner.OS }}-perfect-freehand-
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - run: flutter pub get
+
+      - name: Run data-driven-fixes tests
+        working-directory: test_fixes
+        run: dart fix --compare-to-golden
+
+      - name: Run tests
+        run: flutter test --coverage

@@ -1,4 +1,11 @@
-/// Get the stroke's radius, given its size, thinning and pressure.
-double getStrokeRadius(double size, double thinning, double pressure) {
-  return size * (0.5 - thinning * (0.5 - pressure));
+import 'package:perfect_freehand/src/types.dart';
+
+/// Compute a radius based on the pressure.
+double getStrokeRadius(
+  double size,
+  double thinning,
+  double pressure, [
+  double Function(double) easing = StrokeEasings.identity,
+]) {
+  return size * easing(0.5 - thinning * (0.5 - pressure));
 }

@@ -1,0 +1,69 @@
+name: Publish to GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+          key: ${{ runner.OS }}-perfect-freehand-${{ hashFiles('**/pubspec.lock') }}-${{ hashFiles('**/*.dart') }}
+          restore-keys: |
+            ${{ runner.OS }}-perfect-freehand-
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - name: Build web
+        working-directory: example
+        run: |
+          flutter build web --release \
+            --web-renderer=canvaskit \
+            --base-href=/perfect-freehand-dart/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: example/build/web
+
+  deploy:
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

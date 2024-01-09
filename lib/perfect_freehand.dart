@@ -1,4 +1,10 @@
-export 'src/get_stroke.dart' show getStroke;
-export 'src/get_stroke_outline_points.dart' show getStrokeOutlinePoints;
-export 'src/get_stroke_points.dart' show getStrokePoints;
-export 'src/point.dart' show Point;
+library perfect_freehand;
+
+export 'src/get_stroke_outline_points.dart';
+export 'src/get_stroke_points.dart';
+// export 'src/get_stroke_radius.dart';
+export 'src/get_stroke.dart';
+export 'src/types.dart';
+
+// deprecated stuff (needs to be exposed for dart fix)
+export 'src/point.dart';
