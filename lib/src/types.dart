@@ -136,15 +136,22 @@ class PointVector extends Offset {
     this.x,
     this.y, [
     this.pressure,
-  ]) : super(
-          x,
-          y,
-        );
+  ]) : super(x, y);
 
+  /// Identical to [dx]
   final double x;
+
+  /// Identical to [dy]
   final double y;
+
+  /// The pressure of the point, between 0 and 1,
+  /// or null if the pressure is unknown.
   final double? pressure;
 
+  /// Deprecated non-nullable pressure value.
+  ///
+  /// If [pressure] is null, this will return 0.5
+  /// to match the previous behavior.
   @Deprecated('Use pressure instead')
   double get p => pressure ?? 0.5;
 
@@ -290,13 +297,23 @@ class PointVector extends Offset {
     );
   }
 
+  /// Compares this [PointVector] to an [Offset] or [PointVector] [other]
+  /// for equality.
+  ///
+  /// If [other] is another [PointVector],
+  /// it must have the same [x], [y], and [pressure] values.
+  ///
+  /// If [other] is an [Offset],
+  /// it must have the same [dx] and [dy] values.
   @override
   bool operator ==(Object other) =>
-      other is PointVector &&
-      x == other.x &&
-      y == other.y &&
-      pressure == other.pressure;
+      other is Offset &&
+      x == other.dx &&
+      y == other.dy &&
+      (other is! PointVector || pressure == other.pressure);
 
+  /// Returns a hash of the [x] and [y] values.
+  /// This matches the hashcode of an Offset with those same values.
   @override
-  int get hashCode => Object.hash(x, y, pressure);
+  int get hashCode => super.hashCode;
 }
