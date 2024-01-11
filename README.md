@@ -129,10 +129,9 @@ Notes:
 
 While `getStroke` returns an array of points representing the outline of a stroke, it's up to you to decide how you will render these points.
 
-See the example project to see how you might draw these points in Flutter. The main files are:
-- [stroke.dart](https://github.com/steveruizok/perfect-freehand-dart/blob/main/example/lib/stroke.dart), a class to hold a list of points
-- [sketcher.dart](https://github.com/steveruizok/perfect-freehand-dart/blob/main/example/lib/sketcher.dart), the `CustomPainter` that draws the strokes
-- [drawing_page.dart](https://github.com/steveruizok/perfect-freehand-dart/blob/main/example/lib/sketcher.dart), the demo page that contains all the logic
+See the `StrokePainter` class in the
+[example project](https://github.com/steveruizok/perfect-freehand-dart/blob/main/example/lib/main.dart)
+to see how you might draw these points in Flutter with a `CustomPainter`.
 
 ### Advanced Usage
 
