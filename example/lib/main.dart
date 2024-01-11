@@ -5,7 +5,22 @@ import 'package:perfect_freehand/perfect_freehand.dart';
 import 'package:perfect_freehand_example/toolbar.dart';
 
 void main() {
-  runApp(const DemoDrawingApp());
+  runApp(
+    MaterialApp(
+      title: 'Drawing App',
+      debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.system,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        colorSchemeSeed: Colors.blue,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        colorSchemeSeed: Colors.blue,
+      ),
+      home: const DemoDrawingApp(),
+    ),
+  );
 }
 
 class DemoDrawingApp extends StatefulWidget {
@@ -79,52 +94,48 @@ class _DemoDrawingAppState extends State<DemoDrawingApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Drawing App',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        body: Listener(
-          onPointerDown: onPointerDown,
-          onPointerMove: onPointerMove,
-          onPointerUp: onPointerUp,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ValueListenableBuilder(
-                  valueListenable: lines,
-                  builder: (context, lines, _) {
-                    return CustomPaint(
-                      painter: StrokePainter(
-                        lines: lines,
-                        options: options,
-                      ),
-                    );
-                  },
-                ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      body: Listener(
+        onPointerDown: onPointerDown,
+        onPointerMove: onPointerMove,
+        onPointerUp: onPointerUp,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: ValueListenableBuilder(
+                valueListenable: lines,
+                builder: (context, lines, _) {
+                  return CustomPaint(
+                    painter: StrokePainter(
+                      color: colorScheme.onSurface,
+                      lines: lines,
+                      options: options,
+                    ),
+                  );
+                },
               ),
-              Positioned.fill(
-                child: ValueListenableBuilder(
-                  valueListenable: line,
-                  builder: (context, line, _) {
-                    return CustomPaint(
-                      painter: StrokePainter(
-                        lines: line == null ? [] : [line],
-                        options: options,
-                      ),
-                    );
-                  },
-                ),
+            ),
+            Positioned.fill(
+              child: ValueListenableBuilder(
+                valueListenable: line,
+                builder: (context, line, _) {
+                  return CustomPaint(
+                    painter: StrokePainter(
+                      color: colorScheme.onSurface,
+                      lines: line == null ? [] : [line],
+                      options: options,
+                    ),
+                  );
+                },
               ),
-              Toolbar(
-                options: options,
-                updateOptions: setState,
-                clear: clear,
-              ),
-            ],
-          ),
+            ),
+            Toolbar(
+              options: options,
+              updateOptions: setState,
+              clear: clear,
+            ),
+          ],
         ),
       ),
     );
@@ -139,17 +150,19 @@ class _DemoDrawingAppState extends State<DemoDrawingApp> {
 }
 
 class StrokePainter extends CustomPainter {
-  StrokePainter({
+  const StrokePainter({
+    required this.color,
     required this.lines,
     required this.options,
   });
 
+  final Color color;
   final List<Stroke> lines;
   final StrokeOptions options;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black;
+    final paint = Paint()..color = color;
 
     for (final line in lines) {
       final outlinePoints = getStroke(line.points, options);
