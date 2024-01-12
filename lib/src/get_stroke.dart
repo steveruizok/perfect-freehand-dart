@@ -15,7 +15,10 @@ List<Offset> getStroke(
   bool rememberSimulatedPressure = false,
 }) {
   return getStrokeOutlinePoints(
-    getStrokePoints(points, options: options,),
+    getStrokePoints(
+      points,
+      options: options,
+    ),
     options: options,
     rememberSimulatedPressure: rememberSimulatedPressure,
   );
