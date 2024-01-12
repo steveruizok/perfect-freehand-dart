@@ -4,9 +4,9 @@ import 'package:perfect_freehand/src/types.dart';
 /// an adjusted point, pressure, vector, distance,
 /// and runningLength.
 List<StrokePoint> getStrokePoints(
-  List<PointVector> points,
+  List<PointVector> points, {
   StrokeOptions? options,
-) {
+}) {
   final streamline = options?.streamline ?? 0.5;
   final size = options?.size ?? 16;
   final isComplete = options?.isComplete ?? false;

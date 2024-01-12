@@ -18,10 +18,10 @@ const fixedPi = pi + 0.0001;
 /// The [rememberSimulatedPressure] argument sets whether to update the
 /// input [points] with the simulated pressure values.
 List<Offset> getStrokeOutlinePoints(
-  List<StrokePoint> points, [
+  List<StrokePoint> points, {
   StrokeOptions? options,
   bool rememberSimulatedPressure = false,
-]) {
+}) {
   final size = options?.size ?? 16;
   final smoothing = options?.smoothing ?? 0.5;
   final thinning = options?.thinning ?? 0.5;

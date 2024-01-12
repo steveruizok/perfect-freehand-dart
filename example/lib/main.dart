@@ -165,7 +165,7 @@ class StrokePainter extends CustomPainter {
     final paint = Paint()..color = color;
 
     for (final line in lines) {
-      final outlinePoints = getStroke(line.points, options);
+      final outlinePoints = getStroke(line.points, options: options);
 
       if (outlinePoints.isEmpty) {
         continue;

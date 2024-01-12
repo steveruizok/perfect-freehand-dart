@@ -11,11 +11,11 @@ void main() {
       ];
       final originalStroke = getStroke(
         points,
-        StrokeOptions(
+        options: StrokeOptions(
           simulatePressure: true,
           isComplete: true,
         ),
-        true,
+        rememberSimulatedPressure: true,
       );
       const expectedPressures = [
         // The points at (0, 0)
@@ -37,7 +37,7 @@ void main() {
       // using the remembered pressure.
       final rememberedStroke = getStroke(
         points.where((p) => p.pressure != null).toList(),
-        StrokeOptions(
+        options: StrokeOptions(
           simulatePressure: false,
           isComplete: true,
         ),
@@ -64,11 +64,11 @@ void main() {
 
       getStroke(
         points,
-        StrokeOptions(
+        options: StrokeOptions(
           simulatePressure: true,
           isComplete: true,
         ),
-        false,
+        rememberSimulatedPressure: false,
       );
 
       for (var i = 0; i < points.length; i++) {

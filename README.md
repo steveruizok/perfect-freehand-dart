@@ -63,7 +63,7 @@ but you can also pass it directly to `getStroke`.
 ```dart
 final stroke = getStroke(
   myPoints,
-  StrokeOptions(
+  options: StrokeOptions(
     size: 16,
     thinning: 0.7,
     smoothing: 0.5,
@@ -94,7 +94,7 @@ List<PointVector> myPoints = [
 
 final stroke = getStroke(
   myPoints,
-  StrokeOptions(
+  options: StrokeOptions(
     simulatePressure: false,
   ),
 );
@@ -151,7 +151,7 @@ final options = StrokeOptions(
   size: 16,
 );
 
-final strokePoints = getStrokePoints(myPoints, options);
+final strokePoints = getStrokePoints(myPoints, options: options);
 ```
 
 #### `getOutlinePoints`
@@ -168,9 +168,9 @@ final options = StrokeOptions(
   size: 16,
 );
 
-final myStrokePoints = getStrokePoints(myPoints, options);
+final myStrokePoints = getStrokePoints(myPoints, options: options);
 
-final myOutlinePoints = getStrokeOutlinePoints(myStrokePoints, options);
+final myOutlinePoints = getStrokeOutlinePoints(myStrokePoints, options: options);
 ```
 
 **Note:** Internally, the `getStroke` function passes the result of `getStrokePoints` to `getStrokeOutlinePoints`, just as shown in this example. This means that, in this example, the result of `myOutlinePoints` will be the same as if the `myPoints` List had been passed to `getStroke`.
@@ -189,12 +189,12 @@ List<PointVector> myPoints = [/* ... */];
 
 getStroke(
   myPoints,
-  StrokeOptions(
+  options: StrokeOptions(
     // isComplete and simulatePressure must be true for rememberSimulatedPressure
     simulatePressure: true,
     isComplete: true,
   ),
-  true, // rememberSimulatedPressure
+  rememberSimulatedPressure: true,
 );
 
 // myPoints now have pressure values (except for duplicate points)
