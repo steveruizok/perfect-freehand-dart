@@ -175,6 +175,55 @@ final myOutlinePoints = getStrokeOutlinePoints(myStrokePoints, options);
 
 **Note:** Internally, the `getStroke` function passes the result of `getStrokePoints` to `getStrokeOutlinePoints`, just as shown in this example. This means that, in this example, the result of `myOutlinePoints` will be the same as if the `myPoints` List had been passed to `getStroke`.
 
+#### `rememberSimulatedPressure`
+
+Pressure simulation relies on the distance between points to determine the pressure at each point.
+But in some scenarios, it would be wasteful to store all of these points.
+
+The `rememberSimulatedPressure` argument solves this problem by calculating the pressure once
+and then storing it in the original array of points.
+
+```dart
+/// Input points without pressure values
+List<PointVector> myPoints = [/* ... */];
+
+getStroke(
+  myPoints,
+  StrokeOptions(
+    // isComplete and simulatePressure must be true for rememberSimulatedPressure
+    simulatePressure: true,
+    isComplete: true,
+  ),
+  true, // rememberSimulatedPressure
+);
+
+// myPoints now have pressure values (except for duplicate points)
+print(myPoints[0].pressure); // (some number, not null)
+
+// We are now free to compress myPoints however we want, e.g.
+// this function removes duplicate points and points that are too close together:
+void optimisePoints({double thresholdMultiplier = 0.1}) {
+  if (points.length <= 3) return;
+
+  final minDistance = strokeOptions.size * thresholdMultiplier;
+
+  // Duplicate points have null pressure values, so we can remove them
+  myPoints.removeWhere((point) => point.pressure == null);
+
+  for (int i = 1; i < points.length - 1; i++) {
+    final point = points[i];
+    final prev = points[i - 1];
+    final next = points[i + 1];
+
+    if (prev.distanceSquaredTo(point) < minDistance * minDistance &&
+        next.distanceSquaredTo(point) < minDistance * minDistance) {
+      points.removeAt(i);
+      i--;
+    }
+  }
+}
+```
+
 ## Community
 
 ### Support
