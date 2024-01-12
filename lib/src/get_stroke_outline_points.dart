@@ -11,9 +11,16 @@ const rateOfPressureChange = 0.275;
 const fixedPi = pi + 0.0001;
 
 /// Get an array of points representing the outline of a stroke.
+///
+/// Used internally by `getStroke` but possibly of separate interest.
+/// Accepts the result of `getStrokePoints`.
+///
+/// The [rememberSimulatedPressure] argument sets whether to update the
+/// input [points] with the simulated pressure values.
 List<Offset> getStrokeOutlinePoints(
   List<StrokePoint> points, [
   StrokeOptions? options,
+  bool rememberSimulatedPressure = false,
 ]) {
   final size = options?.size ?? 16;
   final smoothing = options?.smoothing ?? 0.5;
@@ -28,6 +35,11 @@ List<Offset> getStrokeOutlinePoints(
   final taperStartEase = start.easing ?? StrokeEasings.easeInOut;
   final capEnd = end.cap ?? true;
   final taperEndEase = end.easing ?? StrokeEasings.easeOutCubic;
+
+  if (rememberSimulatedPressure) {
+    assert(simulatePressure && isComplete,
+        'rememberSimulatedPressure can only be used when simulatePressure and isComplete are true.');
+  }
 
   // We can't do anything with an empty array or a stroke with negative size.
   if (points.isEmpty || size <= 0) return [];
@@ -50,7 +62,7 @@ List<Offset> getStrokeOutlinePoints(
   final rightPoints = <PointVector>[];
 
   // Previous pressure.
-  // We start with average of first five pressures,
+  // We start with average of first 10 pressures,
   // in order to prevent fat starts for every line.
   // Drawn lines almost always start slow!
   var prevPressure = () {
@@ -137,6 +149,11 @@ List<Offset> getStrokeOutlinePoints(
         final rp = min(1, 1 - sp);
         pressure = min(1,
             prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange));
+
+        // Update the point's pressure
+        if (rememberSimulatedPressure) {
+          points[i].updatePressure(pressure);
+        }
       }
 
       radius = getStrokeRadius(
