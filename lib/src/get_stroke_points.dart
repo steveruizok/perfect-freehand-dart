@@ -48,12 +48,19 @@ List<StrokePoint> getStrokePoints(
     ));
   }
 
+  /// Updates the pressure of the point at index [i].
+  /// This is used in [getStrokeOutlinePoints] if [rememberSimulatedPressure]
+  /// is true and once the pressure has been calculated.
+  void updatePressure(int i, double pressure) {
+    points[i] = points[i].copyWith(pressure: pressure);
+  }
+
   // The [strokePoints] array will hold the points for the stroke.
   // Start it out with the first point, which needs no adjustment.
   final strokePoints = <StrokePoint>[
     StrokePoint(
       point: pts.first,
-      pressure: pts.first.pressure ?? 0.25,
+      updatePressure: (pressure) => updatePressure(0, pressure),
       vector: PointVector.one,
       distance: 0,
       runningLength: 0,
@@ -105,8 +112,8 @@ List<StrokePoint> getStrokePoints(
     prev = StrokePoint(
       // The adjusted point
       point: point,
-      // The input pressure (or 0.5 if not specified)
-      pressure: pts[i].pressure!,
+      // A function to update the pressure of the point
+      updatePressure: (pressure) => updatePressure(i, pressure),
       // The vector from the current point to the previous point
       vector: point.unitVectorTo(prev.point),
       // The distance between the current point and the previous point
