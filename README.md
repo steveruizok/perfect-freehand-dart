@@ -117,13 +117,14 @@ This object accepts the following properties:
 | `end     `           | StrokeEndOptions |         | How far to taper the end of the line.                                                                            |
 | `start.cap`          | bool             | true    | Whether to cap the start of the line.                                                                            |
 | `start.taperEnabled` | bool             | false   | Whether to taper the start of the line.                                                                          |
-| `start.customTaper`  | double           |         | A custom taper value for the start of the line, defaults to the total running length.                            |
+| `start.customTaper`  | double           | null    | A custom taper value for the start of the line, defaults to the total running length.                            |
 
 Notes:
 - When the `isComplete` property is `true`, the line's end will be drawn at the last input point, rather than slightly behind it.
 - The `StrokeEndOptions.cap` property has no effect when `StrokeEndOptions.taperEnabled` is `true`.
 - To create a stroke with a constant width, set the `thinning` option to `0`.
 - To create a stroke that gets thinner with pressure instead of thicker, use a negative number for the `thinning` option.
+- You can change the defaults by setting e.g. `StrokeOptions.defaultThinning` or `StrokeEndOptions.defaultCap` to a different value.
 
 ### Rendering
 
