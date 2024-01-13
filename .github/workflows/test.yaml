@@ -17,9 +17,9 @@ jobs:
         with:
           path: |
             build
-          key: ${{ runner.OS }}-perfect-freehand-${{ hashFiles('**/pubspec.lock') }}-${{ hashFiles('**/*.dart') }}
+          key: ${{ runner.OS }}-perfect-freehand-${{ hashFiles('pubspec.lock', '**/pubspec.lock') }}-${{ hashFiles('**/*.dart') }}
           restore-keys: |
-            ${{ runner.OS }}-perfect-freehand-
+            ${{ runner.OS }}-perfect-freehand-${{ hashFiles('pubspec.lock', '**/pubspec.lock') }}-
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
