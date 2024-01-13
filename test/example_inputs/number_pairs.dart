@@ -1,4 +1,4 @@
-import 'package:perfect_freehand/src/types.dart';
+import 'package:perfect_freehand/src/types/point_vector.dart';
 
 const numberPairs = [
   PointVector(0, 0),

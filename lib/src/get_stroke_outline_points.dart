@@ -2,7 +2,10 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:perfect_freehand/src/get_stroke_radius.dart';
-import 'package:perfect_freehand/src/types.dart';
+import 'package:perfect_freehand/src/types/easings.dart';
+import 'package:perfect_freehand/src/types/point_vector.dart';
+import 'package:perfect_freehand/src/types/stroke_options.dart';
+import 'package:perfect_freehand/src/types/stroke_point.dart';
 
 // This is the rate of change for simulated pressure. It could be an option.
 const rateOfPressureChange = 0.275;

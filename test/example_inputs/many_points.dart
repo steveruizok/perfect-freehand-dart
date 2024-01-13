@@ -1,4 +1,4 @@
-import 'package:perfect_freehand/src/types.dart';
+import 'package:perfect_freehand/src/types/point_vector.dart';
 
 const manyPoints = [
   PointVector(0.10105298913043725, 191.7481151785667),

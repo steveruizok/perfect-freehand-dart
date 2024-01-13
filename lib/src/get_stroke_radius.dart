@@ -1,4 +1,4 @@
-import 'package:perfect_freehand/src/types.dart';
+import 'package:perfect_freehand/src/types/easings.dart';
 
 /// Compute a radius based on the pressure.
 double getStrokeRadius(

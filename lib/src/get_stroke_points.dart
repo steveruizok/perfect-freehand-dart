@@ -1,4 +1,6 @@
-import 'package:perfect_freehand/src/types.dart';
+import 'package:perfect_freehand/src/types/point_vector.dart';
+import 'package:perfect_freehand/src/types/stroke_options.dart';
+import 'package:perfect_freehand/src/types/stroke_point.dart';
 
 /// Get an array of points as objects with
 /// an adjusted point, pressure, vector, distance,
