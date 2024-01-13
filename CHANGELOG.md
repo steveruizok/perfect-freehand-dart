@@ -1,3 +1,7 @@
+## 2.2.0
+
+- Breaking change: The properties of `StrokeOptions` are now non-nullable. This means that e.g. `StrokeOptions.smoothing` now defaults to `StrokeOptions.defaultSmoothing` instead of `null`. Note that you can change the defaults.
+
 ## 2.1.0
 
 - Breaking change: `getStroke(points, options)` is now `getStroke(points, options: options)`.
