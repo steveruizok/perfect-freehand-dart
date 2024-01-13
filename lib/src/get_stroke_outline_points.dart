@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:perfect_freehand/src/get_stroke_radius.dart';
-import 'package:perfect_freehand/src/types/easings.dart';
 import 'package:perfect_freehand/src/types/point_vector.dart';
 import 'package:perfect_freehand/src/types/stroke_options.dart';
 import 'package:perfect_freehand/src/types/stroke_point.dart';
@@ -22,43 +21,29 @@ const fixedPi = pi + 0.0001;
 /// input [points] with the simulated pressure values.
 List<Offset> getStrokeOutlinePoints(
   List<StrokePoint> points, {
-  StrokeOptions? options,
+  required StrokeOptions options,
   bool rememberSimulatedPressure = false,
 }) {
-  final size = options?.size ?? 16;
-  final smoothing = options?.smoothing ?? 0.5;
-  final thinning = options?.thinning ?? 0.5;
-  final simulatePressure = options?.simulatePressure ?? true;
-  final easing = options?.easing ?? StrokeEasings.identity;
-  final start = options?.start ?? StrokeEndOptions();
-  final end = options?.end ?? StrokeEndOptions();
-  final isComplete = options?.isComplete ?? false;
-
-  final capStart = start.cap ?? true;
-  final taperStartEase = start.easing ?? StrokeEasings.easeInOut;
-  final capEnd = end.cap ?? true;
-  final taperEndEase = end.easing ?? StrokeEasings.easeOutCubic;
-
   if (rememberSimulatedPressure) {
-    assert(simulatePressure && isComplete,
+    assert(options.simulatePressure && options.isComplete,
         'rememberSimulatedPressure can only be used when simulatePressure and isComplete are true.');
   }
 
   // We can't do anything with an empty array or a stroke with negative size.
-  if (points.isEmpty || size <= 0) return [];
+  if (points.isEmpty || options.size <= 0) return [];
 
   // The total length of the line.
   final totalLength = points.last.runningLength;
 
-  final taperStart = (start.taperEnabled ?? false)
-      ? start.customTaper ?? max(size, totalLength)
+  final taperStart = options.start.taperEnabled
+      ? options.start.customTaper ?? max(options.size, totalLength)
       : 0.0;
-  final taperEnd = (end.taperEnabled ?? false)
-      ? end.customTaper ?? max(size, totalLength)
+  final taperEnd = options.end.taperEnabled
+      ? options.end.customTaper ?? max(options.size, totalLength)
       : 0.0;
 
   /// The minimum allowed distance between points (squared)
-  final minDistance = pow(size * smoothing, 2);
+  final minDistance = pow(options.size * options.smoothing, 2);
 
   // Our collected left and right points
   final leftPoints = <PointVector>[];
@@ -72,9 +57,9 @@ List<Offset> getStrokeOutlinePoints(
     double acc = points.first.pressure;
     for (final curr in points.sublist(0, min(10, points.length - 1))) {
       final double pressure;
-      if (simulatePressure) {
+      if (options.simulatePressure) {
         // Speed of change - how fast should the pressure be changing?
-        final sp = min(1, curr.distance / size);
+        final sp = min(1, curr.distance / options.size);
         // Rate of change - how much of a change is there?
         final rp = min(1, 1 - sp);
         // Accelerate the pressure
@@ -90,10 +75,10 @@ List<Offset> getStrokeOutlinePoints(
 
   // The current radius
   var radius = getStrokeRadius(
-    size,
-    thinning,
+    options.size,
+    options.thinning,
     points.last.pressure,
-    easing,
+    options.easing,
   );
 
   // The radius of the first saved point
@@ -131,7 +116,7 @@ List<Offset> getStrokeOutlinePoints(
     final runningLength = points[i].runningLength;
 
     // Removes noise from the end of the line
-    if (i < points.length - 1 && totalLength - runningLength < size) {
+    if (i < points.length - 1 && totalLength - runningLength < options.size) {
       continue;
     }
 
@@ -143,12 +128,12 @@ List<Offset> getStrokeOutlinePoints(
      * pressure.
      */
 
-    if (thinning != 0) {
-      if (simulatePressure) {
+    if (options.thinning != 0) {
+      if (options.simulatePressure) {
         // If we're simulating pressure, then do so based on the distance
         // between the current point and the previous point, and the size
         // of the stroke. Otherwise, use the input pressure.
-        final sp = min(1, distance / size);
+        final sp = min(1, distance / options.size);
         final rp = min(1, 1 - sp);
         pressure = min(1,
             prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange));
@@ -160,13 +145,13 @@ List<Offset> getStrokeOutlinePoints(
       }
 
       radius = getStrokeRadius(
-        size,
-        thinning,
+        options.size,
+        options.thinning,
         pressure,
-        easing,
+        options.easing,
       );
     } else {
-      radius = size / 2;
+      radius = options.size / 2;
     }
 
     firstRadius ??= radius;
@@ -180,10 +165,10 @@ List<Offset> getStrokeOutlinePoints(
      */
 
     final ts = runningLength < taperStart
-        ? taperStartEase(runningLength / taperStart)
+        ? options.start.easing(runningLength / taperStart)
         : 1;
     final te = totalLength - runningLength < taperEnd
-        ? taperEndEase((totalLength - runningLength) / taperEnd)
+        ? options.end.easing((totalLength - runningLength) / taperEnd)
         : 1;
 
     radius = max(0.01, radius * min(ts, te));
@@ -296,7 +281,7 @@ List<Offset> getStrokeOutlinePoints(
    */
 
   if (points.length == 1) {
-    if (!(taperStart > 0 || taperEnd > 0) || isComplete) {
+    if (!(taperStart > 0 || taperEnd > 0) || options.isComplete) {
       final start = firstPoint.project(
         (firstPoint - lastPoint).perpendicular().unit(),
         -(firstRadius ?? radius),
@@ -320,7 +305,7 @@ List<Offset> getStrokeOutlinePoints(
 
     if (taperStart > 0 || (taperEnd > 0 && points.length == 1)) {
       // The start point is tapered, noop
-    } else if (capStart) {
+    } else if (options.start.cap) {
       // Draw the round cap - add thirteen points rotating the right point
       // around the start point to the left point
       const step = 1 / 13;
@@ -357,7 +342,7 @@ List<Offset> getStrokeOutlinePoints(
   if (taperEnd > 0 || (taperStart > 0 && points.length == 1)) {
     // Tapered end - push the last point to the line
     endCap.add(lastPoint);
-  } else if (capEnd) {
+  } else if (options.end.cap) {
     // Draw the round end cap
     final start = lastPoint.project(direction, radius);
     const step = 1 / 29;

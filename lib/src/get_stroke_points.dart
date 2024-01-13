@@ -7,17 +7,13 @@ import 'package:perfect_freehand/src/types/stroke_point.dart';
 /// and runningLength.
 List<StrokePoint> getStrokePoints(
   List<PointVector> points, {
-  StrokeOptions? options,
+  required StrokeOptions options,
 }) {
-  final streamline = options?.streamline ?? 0.5;
-  final size = options?.size ?? 16;
-  final isComplete = options?.isComplete ?? false;
-
   // If we don't have any points, return an empty array.
   if (points.isEmpty) return [];
 
   // Find the interpolation level between points.
-  final t = 0.15 + (1 - streamline) * 0.85;
+  final t = 0.15 + (1 - options.streamline) * 0.85;
 
   // Clone array of points and fill in missing pressure values.
   final pts =
@@ -83,7 +79,7 @@ List<StrokePoint> getStrokePoints(
 
   // Iterate through all of the points, creating StrokePoints.
   for (int i = 0; i < pts.length; ++i) {
-    final point = (isComplete && i == max)
+    final point = (options.isComplete && i == max)
         // If we're at the last point, and [options.last] is true,
         // then add the actual input point.
         ? pts[i]
@@ -105,7 +101,7 @@ List<StrokePoint> getStrokePoints(
     // At the start of the line, we wait until the new point is a
     // certain distance away from the original point, to avoid noise.
     if (i < max && !hasReachedMinimumLength) {
-      if (runningLength < size) continue;
+      if (runningLength < options.size) continue;
       hasReachedMinimumLength = true;
       // TODO(steveruizok): Backfill the missing points so that tapering works correctly.
     }

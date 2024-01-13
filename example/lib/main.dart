@@ -36,12 +36,12 @@ class _DemoDrawingAppState extends State<DemoDrawingApp> {
     thinning: 0.7,
     smoothing: 0.5,
     streamline: 0.5,
-    start: StrokeEndOptions(
+    start: StrokeEndOptions.start(
       taperEnabled: true,
       customTaper: 0.0,
       cap: true,
     ),
-    end: StrokeEndOptions(
+    end: StrokeEndOptions.end(
       taperEnabled: true,
       customTaper: 0.0,
       cap: true,
@@ -173,7 +173,7 @@ class StrokePainter extends CustomPainter {
         // If the path only has one point, draw a dot.
         canvas.drawCircle(
           outlinePoints.first,
-          (options.size ?? 16) / 2,
+          options.size / 2,
           paint,
         );
       } else {

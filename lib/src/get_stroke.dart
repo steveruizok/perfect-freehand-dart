@@ -15,6 +15,7 @@ List<Offset> getStroke(
   StrokeOptions? options,
   bool rememberSimulatedPressure = false,
 }) {
+  options ??= StrokeOptions();
   return getStrokeOutlinePoints(
     getStrokePoints(
       points,

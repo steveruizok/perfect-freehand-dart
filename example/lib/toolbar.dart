@@ -34,11 +34,11 @@ class Toolbar extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                value: options.size!,
+                value: options.size,
                 min: 1,
                 max: 50,
                 divisions: 100,
-                label: options.size!.round().toString(),
+                label: options.size.round().toString(),
                 onChanged: (double value) => {
                   updateOptions(() {
                     options.size = value;
@@ -52,11 +52,11 @@ class Toolbar extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                value: options.thinning!,
+                value: options.thinning,
                 min: -1,
                 max: 1,
                 divisions: 100,
-                label: options.thinning!.toStringAsFixed(2),
+                label: options.thinning.toStringAsFixed(2),
                 onChanged: (double value) => {
                   updateOptions(() {
                     options.thinning = value;
@@ -70,11 +70,11 @@ class Toolbar extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                value: options.streamline!,
+                value: options.streamline,
                 min: 0,
                 max: 1,
                 divisions: 100,
-                label: options.streamline!.toStringAsFixed(2),
+                label: options.streamline.toStringAsFixed(2),
                 onChanged: (double value) => {
                   updateOptions(() {
                     options.streamline = value;
@@ -88,11 +88,11 @@ class Toolbar extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                value: options.smoothing!,
+                value: options.smoothing,
                 min: 0,
                 max: 1,
                 divisions: 100,
-                label: options.smoothing!.toStringAsFixed(2),
+                label: options.smoothing.toStringAsFixed(2),
                 onChanged: (double value) => {
                   updateOptions(() {
                     options.smoothing = value;
@@ -106,14 +106,14 @@ class Toolbar extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                value: options.start!.customTaper!,
+                value: options.start.customTaper!,
                 min: 0,
                 max: 100,
                 divisions: 100,
-                label: options.start!.customTaper!.toStringAsFixed(2),
+                label: options.start.customTaper!.toStringAsFixed(2),
                 onChanged: (double value) => {
                   updateOptions(() {
-                    options.start!.customTaper = value;
+                    options.start.customTaper = value;
                   })
                 },
               ),
@@ -124,14 +124,14 @@ class Toolbar extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               Slider(
-                value: options.end!.customTaper!,
+                value: options.end.customTaper!,
                 min: 0,
                 max: 100,
                 divisions: 100,
-                label: options.end!.customTaper!.toStringAsFixed(2),
+                label: options.end.customTaper!.toStringAsFixed(2),
                 onChanged: (double value) => {
                   updateOptions(() {
-                    options.end!.customTaper = value;
+                    options.end.customTaper = value;
                   })
                 },
               ),
