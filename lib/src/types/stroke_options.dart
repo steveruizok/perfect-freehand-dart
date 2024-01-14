@@ -57,6 +57,48 @@ class StrokeOptions {
         end = end ?? StrokeEndOptions.end(),
         isComplete = isComplete ?? defaultIsComplete;
 
+  StrokeOptions.fromJson(
+    Map<String, dynamic> json, {
+    double Function(double)? easing,
+    double Function(double)? startEasing,
+    double Function(double)? endEasing,
+  })  : size = json['s'] ?? StrokeOptions.defaultSize,
+        thinning = json['t'] ?? StrokeOptions.defaultThinning,
+        smoothing = json['sm'] ?? StrokeOptions.defaultSmoothing,
+        streamline = json['sl'] ?? StrokeOptions.defaultStreamline,
+        easing = easing ?? defaultEasing,
+        simulatePressure = json['sp'] ?? StrokeOptions.defaultSimulatePressure,
+        start = StrokeEndOptions.start(
+          customTaper: json['ts'],
+          cap: json['cs'] ?? StrokeEndOptions.defaultCap,
+          easing: startEasing,
+        ),
+        end = StrokeEndOptions.end(
+          customTaper: json['te'],
+          cap: json['ce'] ?? StrokeEndOptions.defaultCap,
+          easing: endEasing,
+        ),
+        isComplete = json['f'] ?? true;
+
+  /// Note that the easing functions aren't serialized.
+  /// If you need this functionality, please open an issue or PR.
+  Map<String, dynamic> toJson() => {
+        if (size != StrokeOptions.defaultSize) 's': size,
+        if (thinning != StrokeOptions.defaultThinning) 't': thinning,
+        if (smoothing != StrokeOptions.defaultSmoothing) 'sm': smoothing,
+        if (streamline != StrokeOptions.defaultStreamline) 'sl': streamline,
+
+        // -1 means taper is enabled, but no custom taper is set.
+        if (start.taperEnabled) 'ts': start.customTaper ?? -1,
+        if (end.taperEnabled) 'te': end.customTaper ?? -1,
+        if (start.cap != StrokeEndOptions.defaultCap) 'cs': start.cap,
+        if (end.cap != StrokeEndOptions.defaultCap) 'ce': end.cap,
+
+        if (simulatePressure != StrokeOptions.defaultSimulatePressure)
+          'sp': simulatePressure,
+        if (isComplete != true) 'f': isComplete,
+      };
+
   StrokeOptions copyWith({
     double? size,
     double? thinning,
@@ -79,6 +121,35 @@ class StrokeOptions {
         end: end ?? this.end,
         isComplete: isComplete ?? this.isComplete,
       );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is StrokeOptions &&
+        other.size == size &&
+        other.thinning == thinning &&
+        other.smoothing == smoothing &&
+        other.streamline == streamline &&
+        other.easing == easing &&
+        other.simulatePressure == simulatePressure &&
+        other.start == start &&
+        other.end == end &&
+        other.isComplete == isComplete;
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        size,
+        thinning,
+        smoothing,
+        streamline,
+        easing,
+        simulatePressure,
+        start,
+        end,
+        isComplete,
+      ]);
 }
 
 /// Stroke options for the start/end of the line.
@@ -94,6 +165,13 @@ class StrokeEndOptions {
   bool taperEnabled;
 
   /// A custom taper value for the start of the line, defaults to the total running length.
+  ///
+  /// For convenience, if [customTaper] is set to `0` in the constructor,
+  /// [taperEnabled] will be set to `false`.
+  ///
+  /// For convenience, if [customTaper] is set to `-1` in the constructor,
+  /// [taperEnabled] will be set to `true` and [customTaper] will be set to
+  /// `null`.
   double? customTaper;
 
   double Function(double) easing;
@@ -105,7 +183,8 @@ class StrokeEndOptions {
     required this.easing,
   }) {
     if (customTaper != null) {
-      taperEnabled = true;
+      taperEnabled = customTaper != 0;
+      if (customTaper == -1) customTaper = null;
     }
   }
 
@@ -134,4 +213,23 @@ class StrokeEndOptions {
           customTaper: customTaper,
           easing: easing ?? StrokeEasings.easeOutCubic,
         );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is StrokeEndOptions &&
+        other.cap == cap &&
+        other.taperEnabled == taperEnabled &&
+        other.customTaper == customTaper &&
+        other.easing == easing;
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        cap,
+        taperEnabled,
+        customTaper,
+        easing,
+      ]);
 }
