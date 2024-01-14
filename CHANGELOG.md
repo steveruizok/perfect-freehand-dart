@@ -1,3 +1,9 @@
+## 2.2.1
+
+- The default easing function is now `StrokeEasings.easeMiddle` instead of a linear function. This makes strokes' pressure easier to control as the pressure stays around the middle for longer. You can still use the linear easing function by setting `StrokeOptions.easing` and `StrokeEndOptions.easing`.
+
+![Graph of easeMiddle which starts fast, slows down around the middle, then ends fast](https://github.com/steveruizok/perfect-freehand-dart/assets/21128619/23aa63bb-e00c-4d56-bcd3-74275ebea141)
+
 ## 2.2.0
 
 - Breaking change: The properties of `StrokeOptions` are now non-nullable. This means that e.g. `StrokeOptions.smoothing` now defaults to `StrokeOptions.defaultSmoothing` instead of `null`. Note that you can change the defaults.
