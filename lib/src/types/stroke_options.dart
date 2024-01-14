@@ -7,7 +7,7 @@ class StrokeOptions {
   static double defaultThinning = 0.5;
   static double defaultSmoothing = 0.5;
   static double defaultStreamline = 0.5;
-  static double Function(double) defaultEasing = StrokeEasings.identity;
+  static double Function(double) defaultEasing = StrokeEasings.easeMiddle;
   static bool defaultSimulatePressure = true;
   static bool defaultIsComplete = false;
 
@@ -53,8 +53,8 @@ class StrokeOptions {
         streamline = streamline ?? defaultStreamline,
         easing = easing ?? defaultEasing,
         simulatePressure = simulatePressure ?? defaultSimulatePressure,
-        start = start ?? StrokeEndOptions.start(),
-        end = end ?? StrokeEndOptions.end(),
+        start = start ?? StrokeEndOptions(),
+        end = end ?? StrokeEndOptions(),
         isComplete = isComplete ?? defaultIsComplete;
 
   StrokeOptions copyWith({
@@ -98,39 +98,44 @@ class StrokeEndOptions {
 
   double Function(double) easing;
 
-  StrokeEndOptions._({
-    required this.cap,
-    required this.taperEnabled,
+  StrokeEndOptions({
+    bool? cap,
+    bool? taperEnabled,
     this.customTaper,
-    required this.easing,
-  }) {
-    if (customTaper != null) {
-      taperEnabled = true;
-    }
-  }
+    double Function(double)? easing,
+  })  : cap = cap ?? defaultCap,
+        taperEnabled =
+            (taperEnabled ?? defaultTaperEnabled) || (customTaper ?? 0) > 0,
+        easing = easing ?? StrokeOptions.defaultEasing;
 
-  /// The default options for the start of the line.
+  /// The options for the start of the line.
+  /// Uses a deprecated easing function.
+  @Deprecated(
+      'Use StrokeEndOptions() instead. The start and end use the same easing function now.')
   StrokeEndOptions.start({
     bool? cap,
     bool? taperEnabled,
     double? customTaper,
     double Function(double)? easing,
-  }) : this._(
-          cap: cap ?? defaultCap,
-          taperEnabled: taperEnabled ?? defaultTaperEnabled,
+  }) : this(
+          cap: cap,
+          taperEnabled: taperEnabled,
           customTaper: customTaper,
           easing: easing ?? StrokeEasings.easeInOut,
         );
 
-  /// The default options for the end of the line.
+  /// The options for the end of the line.
+  /// Uses a deprecated easing function.
+  @Deprecated(
+      'Use StrokeEndOptions() instead. The start and end use the same easing function now.')
   StrokeEndOptions.end({
     bool? cap,
     bool? taperEnabled,
     double? customTaper,
     double Function(double)? easing,
-  }) : this._(
-          cap: cap ?? defaultCap,
-          taperEnabled: taperEnabled ?? defaultTaperEnabled,
+  }) : this(
+          cap: cap,
+          taperEnabled: taperEnabled,
           customTaper: customTaper,
           easing: easing ?? StrokeEasings.easeOutCubic,
         );
