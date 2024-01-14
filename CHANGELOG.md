@@ -1,3 +1,7 @@
+## 2.3.0
+
+- Added `toJson()` and `fromJson()` methods to `StrokeOptions`.
+
 ## 2.2.0
 
 - Breaking change: The properties of `StrokeOptions` are now non-nullable. This means that e.g. `StrokeOptions.smoothing` now defaults to `StrokeOptions.defaultSmoothing` instead of `null`. Note that you can change the defaults.
