@@ -36,14 +36,12 @@ class _DemoDrawingAppState extends State<DemoDrawingApp> {
     thinning: 0.7,
     smoothing: 0.5,
     streamline: 0.5,
-    start: StrokeEndOptions.start(
-      taperEnabled: true,
-      customTaper: 0.0,
+    start: StrokeEndOptions(
+      taperEnabled: false,
       cap: true,
     ),
-    end: StrokeEndOptions.end(
-      taperEnabled: true,
-      customTaper: 0.0,
+    end: StrokeEndOptions(
+      taperEnabled: false,
       cap: true,
     ),
     simulatePressure: true,
@@ -132,7 +130,7 @@ class _DemoDrawingAppState extends State<DemoDrawingApp> {
             ),
             Toolbar(
               options: options,
-              updateOptions: setState,
+              updateOptions: (update) => setState(() => update(options)),
               clear: clear,
             ),
           ],

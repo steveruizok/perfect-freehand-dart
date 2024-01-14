@@ -10,11 +10,14 @@ class Toolbar extends StatelessWidget {
   });
 
   final StrokeOptions options;
-  final void Function(void Function()) updateOptions;
+  final void Function(void Function(StrokeOptions)) updateOptions;
   final void Function() clear;
+
+  static double identity(double t) => t;
 
   @override
   Widget build(BuildContext context) {
+    print('Building toolbar, size: ${options.size}');
     return Positioned(
       top: 0,
       right: 0,
@@ -39,11 +42,9 @@ class Toolbar extends StatelessWidget {
                 max: 50,
                 divisions: 100,
                 label: options.size.round().toString(),
-                onChanged: (double value) => {
-                  updateOptions(() {
-                    options.size = value;
-                  })
-                },
+                onChanged: (double value) => updateOptions((options) {
+                  options.size = value;
+                }),
               ),
               const Text(
                 'Thinning',
@@ -57,11 +58,9 @@ class Toolbar extends StatelessWidget {
                 max: 1,
                 divisions: 100,
                 label: options.thinning.toStringAsFixed(2),
-                onChanged: (double value) => {
-                  updateOptions(() {
-                    options.thinning = value;
-                  })
-                },
+                onChanged: (double value) => updateOptions((options) {
+                  options.thinning = value;
+                }),
               ),
               const Text(
                 'Streamline',
@@ -75,11 +74,9 @@ class Toolbar extends StatelessWidget {
                 max: 1,
                 divisions: 100,
                 label: options.streamline.toStringAsFixed(2),
-                onChanged: (double value) => {
-                  updateOptions(() {
-                    options.streamline = value;
-                  })
-                },
+                onChanged: (double value) => updateOptions((options) {
+                  options.streamline = value;
+                }),
               ),
               const Text(
                 'Smoothing',
@@ -93,11 +90,9 @@ class Toolbar extends StatelessWidget {
                 max: 1,
                 divisions: 100,
                 label: options.smoothing.toStringAsFixed(2),
-                onChanged: (double value) => {
-                  updateOptions(() {
-                    options.smoothing = value;
-                  })
-                },
+                onChanged: (double value) => updateOptions((options) {
+                  options.smoothing = value;
+                }),
               ),
               const Text(
                 'Taper Start',
@@ -105,17 +100,11 @@ class Toolbar extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
-              Slider(
-                value: options.start.customTaper!,
-                min: 0,
-                max: 100,
-                divisions: 100,
-                label: options.start.customTaper!.toStringAsFixed(2),
-                onChanged: (double value) => {
-                  updateOptions(() {
-                    options.start.customTaper = value;
-                  })
-                },
+              Switch(
+                value: options.start.taperEnabled,
+                onChanged: (bool value) => updateOptions((options) {
+                  options.start.taperEnabled = value;
+                }),
               ),
               const Text(
                 'Taper End',
@@ -123,17 +112,27 @@ class Toolbar extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
-              Slider(
-                value: options.end.customTaper!,
-                min: 0,
-                max: 100,
-                divisions: 100,
-                label: options.end.customTaper!.toStringAsFixed(2),
-                onChanged: (double value) => {
-                  updateOptions(() {
-                    options.end.customTaper = value;
-                  })
-                },
+              Switch(
+                value: options.end.taperEnabled,
+                onChanged: (bool value) => updateOptions((options) {
+                  options.end.taperEnabled = value;
+                }),
+              ),
+              const Text(
+                'Eased pressure',
+                textAlign: TextAlign.start,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+              Switch(
+                value: options.easing != identity,
+                onChanged: (bool value) => updateOptions((options) {
+                  final easing = value ? StrokeEasings.easeMiddle : identity;
+                  StrokeOptions.defaultEasing = easing;
+                  options.easing = easing;
+                  options.start.easing = easing;
+                  options.end.easing = easing;
+                }),
               ),
               const Text(
                 'Clear',
