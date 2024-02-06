@@ -1,3 +1,7 @@
+## 2.3.1
+
+- Fixed an error that occured when trying to lerp a NaN point.
+
 ## 2.3.0
 
 - Added `toJson()` and `fromJson()` methods to `StrokeOptions`.
