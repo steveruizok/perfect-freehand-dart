@@ -48,6 +48,10 @@ class PointVector extends Offset {
     double t,
     PointVector other,
   ) {
+    // avoid null values
+    if (!isFinite) return other;
+    if (!other.isFinite) return this;
+
     return PointVector(
       lerpDouble(x, other.x, t)!,
       lerpDouble(y, other.y, t)!,
