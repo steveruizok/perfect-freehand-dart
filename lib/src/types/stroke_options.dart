@@ -89,8 +89,8 @@ class StrokeOptions {
         if (streamline != StrokeOptions.defaultStreamline) 'sl': streamline,
 
         // -1 means taper is enabled, but no custom taper is set.
-        if (start.taperEnabled) 'ts': start.customTaper ?? -1,
-        if (end.taperEnabled) 'te': end.customTaper ?? -1,
+        if (start.taperEnabled) 'ts': start.customTaper ?? -1.0,
+        if (end.taperEnabled) 'te': end.customTaper ?? -1.0,
         if (start.cap != StrokeEndOptions.defaultCap) 'cs': start.cap,
         if (end.cap != StrokeEndOptions.defaultCap) 'ce': end.cap,
 
