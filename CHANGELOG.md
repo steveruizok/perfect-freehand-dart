@@ -1,3 +1,7 @@
+## 2.3.2
+
+- Fixed an error in `toJson()` when `taperEnabled` is true but `customTaper` is null.
+
 ## 2.3.1
 
 - Fixed an error that occured when trying to lerp a NaN point.
