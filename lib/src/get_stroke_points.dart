@@ -111,7 +111,10 @@ List<StrokePoint> getStrokePoints(
       // The adjusted point
       point: point,
       // A function to update the pressure of the point
-      updatePressure: (pressure) => updatePressure(i, pressure),
+      updatePressure: (pressure) => updatePressure(
+        (points.length == 2 && i >= 2) ? 1 : i, 
+        pressure
+      ),
       // The vector from the current point to the previous point
       vector: point.unitVectorTo(prev.point),
       // The distance between the current point and the previous point
