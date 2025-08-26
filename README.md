@@ -155,7 +155,7 @@ final options = StrokeOptions(
 final strokePoints = getStrokePoints(myPoints, options: options);
 ```
 
-#### `getOutlinePoints`
+#### `getStrokeOutlinePoints`
 
 A function that accepts an array of StrokePoints (i.e. the output of `getStrokePoint`) and returns an array of Points defining the outline of a stroke. Like `getStroke`, this function also accepts any of the [optional named parameters](#options) listed above.
 
