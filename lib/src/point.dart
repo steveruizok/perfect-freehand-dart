@@ -1,17 +1,10 @@
-/// A point with an x and y coordinate and a pressure.
-class Point {
-  /// The horizontal coordinate.
-  final double x;
+import 'package:perfect_freehand/src/types/point_vector.dart';
 
-  /// The vertical coordinate.
-  final double y;
-
-  /// The pressure for this point.
-  final double p;
-
+@Deprecated("Use 'PointVector' instead")
+class Point extends PointVector {
   const Point(
-    this.x,
-    this.y, [
-    this.p = 0.5,
+    super.x,
+    super.y, [
+    super.pressure,
   ]);
 }

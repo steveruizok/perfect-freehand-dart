@@ -1,0 +1,4 @@
+import 'package:perfect_freehand/perfect_freehand.dart';
+
+final point = PointVector(10, 0, 0.5);
+final pressure = point.pressure;

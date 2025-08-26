@@ -1,300 +1,373 @@
 import 'dart:math';
+import 'dart:ui';
 
-import 'get_stroke_radius.dart';
-import 'point.dart';
-import 'stroke_point.dart';
-import 'vec.dart';
+import 'package:perfect_freehand/src/get_stroke_radius.dart';
+import 'package:perfect_freehand/src/types/point_vector.dart';
+import 'package:perfect_freehand/src/types/stroke_options.dart';
+import 'package:perfect_freehand/src/types/stroke_point.dart';
 
-const double rateOfPressureChange = 0.275;
+// This is the rate of change for simulated pressure. It could be an option.
+const rateOfPressureChange = 0.275;
 
-/// Get an array of points representing the outline of a stroke, based on the provided [points]. Used internally by `getStroke` but possibly of separate interest. Accepts the result of `getStrokeOutlinePoints`.
+// Browser strokes seem to be off if PI is regular, a tiny offset seems to fix it
+const fixedPi = pi + 0.0001;
+
+/// Get an array of points representing the outline of a stroke.
 ///
-/// The [size] argument sets the base diameter for the shape.
+/// Used internally by `getStroke` but possibly of separate interest.
+/// Accepts the result of `getStrokePoints`.
 ///
-/// The [thinning] argument sets the effect of pressure on the stroke's size.
-///
-/// The [smoothing] argument sets the density of points along the stroke's edges.
-///
-/// The [streamline] argument sets the level of variation allowed in the input points.
-///
-/// The [taperStart] argument sets the distance to taper the front of the stroke.
-///
-/// The [capStart] argument sets whether to add a cap to the start of the stroke.
-///
-/// The [taperEnd] argument sets the distance to taper the end of the stroke.
-///
-/// The [capEnd] argument sets whether to add a cap to the end of the stroke.
-///
-/// The [simulatePressure] argument sets whether to simulate pressure or use the point's provided pressures.
-///
-/// The [isComplete] argument sets whether the line is complete.
-List<Point> getStrokeOutlinePoints(
+/// The [rememberSimulatedPressure] argument sets whether to update the
+/// input [points] with the simulated pressure values.
+List<Offset> getStrokeOutlinePoints(
   List<StrokePoint> points, {
-  double size = 16,
-  double thinning = 0.7,
-  double smoothing = 0.5,
-  double streamline = 0.5,
-  double taperStart = 0.0,
-  double taperEnd = 0.0,
-  bool capStart = true,
-  bool capEnd = true,
-  bool simulatePressure = true,
-  bool isComplete = false,
+  required StrokeOptions options,
+  bool rememberSimulatedPressure = false,
 }) {
-  if (points.isEmpty || size < 0) return [];
-
-  final totalLength = points.last.runningLength;
-
-  final minDistance = pow(size * smoothing, 2);
-
-  final leftPts = <Point>[];
-
-  final rightPts = <Point>[];
-
-  double prevPressure = points[0].point.p;
-
-  double sp;
-
-  double rp;
-
-  for (var i = 0; i < min(10, points.length); i++) {
-    var pressure = points[i].point.p;
-
-    if (simulatePressure) {
-      sp = min(1, points[i].distance / size);
-
-      rp = min(1, 1 - sp);
-
-      pressure = min(
-        1,
-        prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange),
-      );
-    }
-
-    prevPressure = (prevPressure + pressure) / 2;
+  if (rememberSimulatedPressure) {
+    assert(options.simulatePressure && options.isComplete,
+        'rememberSimulatedPressure can only be used when simulatePressure and isComplete are true.');
   }
 
-  double radius = getStrokeRadius(
-    size,
-    thinning,
-    points.last.point.p,
+  // We can't do anything with an empty array or a stroke with negative size.
+  if (points.isEmpty || options.size <= 0) return [];
+
+  // The total length of the line.
+  final totalLength = points.last.runningLength;
+
+  final taperStart = options.start.taperEnabled
+      ? options.start.customTaper ?? max(options.size, totalLength)
+      : 0.0;
+  final taperEnd = options.end.taperEnabled
+      ? options.end.customTaper ?? max(options.size, totalLength)
+      : 0.0;
+
+  /// The minimum allowed distance between points (squared)
+  final minDistance = pow(options.size * options.smoothing, 2);
+
+  // Our collected left and right points
+  final leftPoints = <PointVector>[];
+  final rightPoints = <PointVector>[];
+
+  // Previous pressure.
+  // We start with average of first 10 pressures,
+  // in order to prevent fat starts for every line.
+  // Drawn lines almost always start slow!
+  var prevPressure = () {
+    double acc = points.first.pressure;
+    for (final curr in points.sublist(0, min(10, points.length - 1))) {
+      final double pressure;
+      if (options.simulatePressure) {
+        // Speed of change - how fast should the pressure be changing?
+        final sp = min(1, curr.distance / options.size);
+        // Rate of change - how much of a change is there?
+        final rp = min(1, 1 - sp);
+        // Accelerate the pressure
+        pressure = min(1, acc + (rp - acc) * (sp * rateOfPressureChange));
+      } else {
+        pressure = curr.pressure;
+      }
+
+      acc = (acc + pressure) / 2;
+    }
+    return acc;
+  }();
+
+  // The current radius
+  var radius = getStrokeRadius(
+    options.size,
+    options.thinning,
+    points.last.pressure,
+    options.easing,
   );
 
+  // The radius of the first saved point
   double? firstRadius;
 
-  var prevVector = points[0].vector;
+  // Previous vector
+  var prevVector = points.first.vector;
 
-  var pl = points[0].point;
-
+  // Previous left and right points
+  var pl = points.first.point;
   var pr = pl;
 
+  // Temporary left and right points
   var tl = pl;
-
   var tr = pr;
 
-  Point nextVector;
+  // Keep track of whether the previous point is a sharp corner
+  // ... so that we don't detect the same corner twice
+  var isPrevPointSharpCorner = false;
 
-  Point offset;
+  // var short = true
 
-  double nextDpr;
+  /**
+   * Find the outline's left and right points
+   * 
+   * Iterating through the points and populate the rightPts and leftPts arrays,
+   * skipping the first and last points, which will get caps later on.
+   */
 
-  double ts;
+  for (int i = 0; i < points.length; ++i) {
+    var pressure = points[i].pressure;
+    final point = points[i].point;
+    final vector = points[i].vector;
+    final distance = points[i].distance;
+    final runningLength = points[i].runningLength;
 
-  double te;
+    // Removes noise from the end of the line
+    if (i < points.length - 1 && totalLength - runningLength < options.size) {
+      continue;
+    }
 
-  for (var i = 0; i < points.length - 1; i++) {
-    final curr = points[i];
+    /**
+     * Calculate the radius
+     * 
+     * If not thinning, the current point's radius will be half the size; or
+     * otherwise, the size will be based on the current (real or simulated)
+     * pressure.
+     */
 
-    if (totalLength - curr.runningLength < 3) continue;
-    // Pressure
+    if (options.thinning != 0) {
+      if (options.simulatePressure) {
+        // If we're simulating pressure, then do so based on the distance
+        // between the current point and the previous point, and the size
+        // of the stroke. Otherwise, use the input pressure.
+        final sp = min(1, distance / options.size);
+        final rp = min(1, 1 - sp);
+        pressure = min(1,
+            prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange));
 
-    var pressure = curr.point.p;
-
-    if (thinning != 0) {
-      if (simulatePressure) {
-        sp = min(1, curr.distance / size);
-        rp = min(1, 1 - sp);
-        pressure = min(
-          1,
-          prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange),
-        );
-        radius = getStrokeRadius(
-          size,
-          thinning,
-          pressure,
-        );
-      } else {
-        radius = getStrokeRadius(
-          size,
-          thinning,
-          pressure,
-        );
+        // Update the point's pressure
+        if (rememberSimulatedPressure) {
+          points[i].updatePressure(pressure);
+        }
       }
+
+      radius = getStrokeRadius(
+        options.size,
+        options.thinning,
+        pressure,
+        options.easing,
+      );
+    } else {
+      radius = options.size / 2;
     }
 
     firstRadius ??= radius;
 
-    // Tapering
+    /**
+     * Apply tapering
+     * 
+     * If the current length if within the taper distance at either the
+     * start or the end, calculate the taper strengths. Apply the smaller
+     * of the two taper strengths to the radius.
+     */
 
-    if (curr.runningLength < taperStart) {
-      ts = curr.runningLength / taperStart;
-    } else {
-      ts = 1;
-    }
-
-    if (totalLength - curr.runningLength < taperEnd) {
-      te = (totalLength - curr.runningLength) / taperEnd;
-    } else {
-      te = 1;
-    }
+    final ts = runningLength < taperStart
+        ? options.start.easing(runningLength / taperStart)
+        : 1;
+    final te = totalLength - runningLength < taperEnd
+        ? options.end.easing((totalLength - runningLength) / taperEnd)
+        : 1;
 
     radius = max(0.01, radius * min(ts, te));
 
-    // Left and Right Points
+    // Add points to left and right
 
-    nextVector = points[i + 1].vector;
+    /**
+     * Handle sharp corners
+     * 
+     * Find the difference (dot product) between the current and next vector.
+     * If the next vector is at more than a right angle to the current vector,
+     * draw a cap at the current point.
+     */
 
-    nextDpr = dpr(curr.vector, nextVector);
+    final nextVector = i < points.length - 1 ? points[i + 1].vector : vector;
+    final nextDpr = i < points.length - 1 ? vector.dpr(nextVector) : 1.0;
+    final prevDpr = vector.dpr(prevVector);
 
-    if (nextDpr < 0) {
-      // Sharp Corner
+    final isPointSharpCorner = prevDpr < 0 && !isPrevPointSharpCorner;
+    final isNextPointSharpCorner = nextDpr < 0;
 
-      final offset = mul(per(prevVector), radius);
+    if (isPointSharpCorner || isNextPointSharpCorner) {
+      // It's a sharp corner. Draw a rounded cap and move on to the next point
+      // Considering saving these and drawing them later? So that we can avoid
+      // crossing future points.
+
+      final offset = prevVector.perpendicular() * radius;
 
       const step = 1 / 13;
-
       for (double t = 0; t <= 1; t += step) {
-        tl = rotAround(sub(curr.point, offset), curr.point, pi * t);
-        leftPts.add(tl);
-        tr = rotAround(add(curr.point, offset), curr.point, pi * -t);
-        rightPts.add(tr);
+        tl = (point - offset).rotAround(point, fixedPi * t);
+        leftPoints.add(tl);
+
+        tr = (point + offset).rotAround(point, fixedPi * -t);
+        rightPoints.add(tr);
       }
 
       pl = tl;
-
       pr = tr;
 
+      if (isNextPointSharpCorner) {
+        isPrevPointSharpCorner = true;
+      }
       continue;
     }
 
-    // Regular points
+    isPrevPointSharpCorner = false;
 
-    offset = mul(per(lrp(nextVector, curr.vector, nextDpr)), radius);
+    // Handle the last point
+    if (i == points.length - 1) {
+      final offset = vector.perpendicular() * radius;
+      leftPoints.add(point - offset);
+      rightPoints.add(point + offset);
+      continue;
+    }
 
-    tl = sub(curr.point, offset);
+    /**
+     * Add regular points
+     * 
+     * Project points to either side of the current point, using the
+     * calculated size as a distance. If a point's distance to the
+     * previous point on that side is greater than the minimum distance
+     * (or if the corner is kinda sharp), add the points to the side's
+     * points array.
+     */
 
-    if (i == 0 || dist2(pl, tl) > minDistance) {
-      leftPts.add(tl);
+    final offset = nextVector.lerp(nextDpr, vector).perpendicular() * radius;
+
+    tl = point - offset;
+
+    if (i <= 1 || pl.distanceSquaredTo(tl) > minDistance) {
+      leftPoints.add(tl);
       pl = tl;
     }
 
-    tr = add(curr.point, offset);
+    tr = point + offset;
 
-    if (i == 0 || dist2(pr, tr) > minDistance) {
-      rightPts.add(tr);
+    if (i <= 1 || pr.distanceSquaredTo(tr) > minDistance) {
+      rightPoints.add(tr);
       pr = tr;
     }
 
+    // Set variables for next iteration
     prevPressure = pressure;
-
-    prevVector = curr.vector;
+    prevVector = vector;
   }
 
+  /**
+   * Drawing caps
+   * 
+   * Now that we have our points on either side of the line, we need to
+   * draw caps at the start and end. Tapered lines don't have caps, but
+   * may have dots for very short lines.
+   */
+
   final firstPoint = points.first.point;
+  final lastPoint =
+      points.length > 1 ? points.last.point : firstPoint + points.first.vector;
 
-  final lastPoint = () {
-    if (points.length > 1) {
-      return points.last.point;
-    } else {
-      return add(
-        firstPoint,
-        Point(1, 1),
+  final startCap = <PointVector>[];
+  final endCap = <PointVector>[];
+
+  /**
+   * Draw a dot for very short or completed strokes
+   * 
+   * If the line is too short to gather left or right points and if the line is
+   * not tapered on either side, draw a dot. If the line is tapered, then only
+   * draw a dot if the line is both very short and complete. If we draw a dot,
+   * we can just return those points.
+   */
+
+  if (points.length == 1) {
+    if (!(taperStart > 0 || taperEnd > 0) || options.isComplete) {
+      final start = firstPoint.project(
+        (firstPoint - lastPoint).perpendicular().unit(),
+        -(firstRadius ?? radius),
       );
-    }
-  }();
-
-  final isVeryShort = leftPts.length <= 1 || rightPts.length <= 1;
-
-  final startCap = <Point>[];
-
-  final endCap = <Point>[];
-
-  if (isVeryShort) {
-    if (!(taperStart > 0 || taperEnd > 0) || isComplete) {
-      final start = prj(
-        firstPoint,
-        uni(per(sub(firstPoint, lastPoint))),
-        -(firstRadius ??= radius),
-      );
-
-      final dotPts = <Point>[];
-
+      final List<PointVector> dotPts = [];
       const step = 1 / 13;
-
       for (double t = step; t <= 1; t += step) {
-        dotPts.add(rotAround(start, firstPoint, pi * 2 * t));
+        dotPts.add(start.rotAround(firstPoint, fixedPi * 2 * t));
       }
-
       return dotPts;
     }
   } else {
-    // Start Cap
+    /**
+     * Draw a start cap
+     * 
+     * Unless the line has a tapered start, or unless the line has a tapered end
+     * and the line is very short, draw a start cap around the first point. Use
+     * the distance between the second left and right point for the cap's radius.
+     * Finally remove the first left and right points. :psyduck:
+     */
 
-    if (taperStart > 0 || (taperEnd > 0 && isVeryShort)) {
-      // noop
-    } else if (capStart) {
+    if (taperStart > 0 || (taperEnd > 0 && points.length == 1)) {
+      // The start point is tapered, noop
+    } else if (options.start.cap) {
+      // Draw the round cap - add thirteen points rotating the right point
+      // around the start point to the left point
       const step = 1 / 13;
-
       for (double t = step; t <= 1; t += step) {
-        startCap.add(rotAround(rightPts.first, firstPoint, pi * t));
+        final pt = rightPoints.first.rotAround(firstPoint, fixedPi * t);
+        startCap.add(pt);
       }
     } else {
-      final cornersVector = sub(leftPts.first, rightPts.first);
+      // Draw the flat cap
+      // - add a point to the left and right of the start point
+      final cornersVector = leftPoints.first - rightPoints.first;
+      final offsetA = cornersVector * 0.5;
+      final offsetB = cornersVector * 0.51;
 
-      final offsetA = mul(cornersVector, 0.5);
-
-      final offsetB = mul(cornersVector, 0.51);
-
-      startCap.addAll(
-        [
-          sub(firstPoint, offsetA),
-          sub(firstPoint, offsetB),
-          add(firstPoint, offsetB),
-          add(firstPoint, offsetA),
-        ],
-      );
-    }
-
-    // End Cap
-
-    final mid = med(leftPts.last, rightPts.last);
-
-    final direction = per(uni(sub(lastPoint, mid)));
-
-    if (taperEnd > 0 || (taperStart > 0 && isVeryShort)) {
-      endCap.add(lastPoint);
-    } else if (capEnd) {
-      final start = prj(lastPoint, direction, radius);
-
-      const step = pi / 10;
-
-      for (double t = 0; t <= pi; t += step) {
-        endCap.add(rotAround(start, lastPoint, t));
-      }
-    } else {
-      endCap.addAll([
-        sub(lastPoint, mul(direction, radius)),
-        sub(lastPoint, mul(direction, radius * .99)),
-        add(lastPoint, mul(direction, radius * .99)),
-        add(lastPoint, mul(direction, radius))
-      ]);
+      startCap.add(firstPoint - offsetA);
+      startCap.add(firstPoint - offsetB);
+      startCap.add(firstPoint + offsetB);
+      startCap.add(firstPoint + offsetA);
     }
   }
 
+  /**
+   * Draw an end cap
+   * 
+   * If the line does not have a tapered end, and unless the line has a tapered
+   * start and the line is very short, draw a cap around the last point. Finally,
+   * remove the last left and right points. Otherwise, add the last point. Note
+   * that This cap is a full-turn-and-a-half: this prevents incorrect caps on
+   * sharp end turns.
+   */
+
+  final direction = (-points.last.vector).perpendicular();
+
+  if (taperEnd > 0 || (taperStart > 0 && points.length == 1)) {
+    // Tapered end - push the last point to the line
+    endCap.add(lastPoint);
+  } else if (options.end.cap) {
+    // Draw the round end cap
+    final start = lastPoint.project(direction, radius);
+    const step = 1 / 29;
+    for (double t = step; t <= 1; t += step) {
+      endCap.add(start.rotAround(lastPoint, fixedPi * 3 * t));
+    }
+  } else {
+    // Draw the flat end cap
+
+    endCap.add(lastPoint + direction * radius);
+    endCap.add(lastPoint + direction * (radius * 0.99));
+    endCap.add(lastPoint - direction * (radius * 0.99));
+    endCap.add(lastPoint - direction * radius);
+  }
+
+  /**
+   * Return the points in the correct winding order: begin on the left side, then
+   * continue around the end cap, then come back along the right side, and finally
+   * complete the start cap.
+   */
+
   return [
-    ...leftPts,
+    ...leftPoints,
     ...endCap,
-    ...rightPts.reversed,
+    ...rightPoints.reversed,
     ...startCap,
   ];
 }
