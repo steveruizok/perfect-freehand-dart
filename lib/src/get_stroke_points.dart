@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:perfect_freehand/src/types/point_vector.dart';
 import 'package:perfect_freehand/src/types/stroke_options.dart';
 import 'package:perfect_freehand/src/types/stroke_point.dart';
@@ -112,8 +114,8 @@ List<StrokePoint> getStrokePoints(
       point: point,
       // A function to update the pressure of the point
       updatePressure: (pressure) => updatePressure(
-        (points.length == 2 && i >= 2) ? 1 : i, 
-        pressure
+        min(i, points.length - 1),
+        pressure,
       ),
       // The vector from the current point to the previous point
       vector: point.unitVectorTo(prev.point),
