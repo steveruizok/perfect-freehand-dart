@@ -190,4 +190,7 @@ class PointVector extends Offset {
   /// This matches the hashcode of an Offset with those same values.
   @override
   int get hashCode => super.hashCode;
+
+  @override
+  String toString() => 'PointVector($x, $y, $pressure)';
 }
