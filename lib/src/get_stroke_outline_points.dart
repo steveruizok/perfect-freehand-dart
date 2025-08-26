@@ -345,9 +345,9 @@ List<Offset> getStrokeOutlinePoints(
   } else if (options.end.cap) {
     // Draw the round end cap
     final start = lastPoint.project(direction, radius);
-    const step = 1 / 29;
+    const step = 1 / 13;
     for (double t = step; t <= 1; t += step) {
-      endCap.add(start.rotAround(lastPoint, fixedPi * 3 * t));
+      endCap.add(start.rotAround(lastPoint, fixedPi * t));
     }
   } else {
     // Draw the flat end cap
