@@ -38,10 +38,7 @@ jobs:
 
       - name: Build web
         working-directory: example
-        run: |
-          flutter build web --release \
-            --web-renderer=canvaskit \
-            --base-href=/perfect-freehand-dart/
+        run: flutter build web --base-href=/perfect-freehand-dart/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
