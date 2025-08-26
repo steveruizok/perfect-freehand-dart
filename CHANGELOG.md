@@ -1,3 +1,9 @@
+## 2.4.0
+
+- Round stroke end caps are now half circles instead of full circles, reducing unnecessary polygon points, thanks to @dodgog in [#14](https://github.com/steveruizok/perfect-freehand-dart/pull/14).
+- Fixed a bug when using the `rememberSimulatedPressure` flag with a list of exactly 2 points, thanks to @ZebraVogel94349 in [#21](https://github.com/steveruizok/perfect-freehand-dart/pull/21).
+- Implemented `PointVector.toString()`.
+
 ## 2.3.2
 
 - Fixed an error in `toJson()` when `taperEnabled` is true but `customTaper` is null.
