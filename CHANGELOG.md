@@ -1,3 +1,7 @@
+## 2.4.0+1
+
+- Fixed image not loading on pub.dev README
+
 ## 2.4.0
 
 - Round stroke end caps are now half circles instead of full circles, reducing unnecessary polygon points, thanks to @dodgog in [#14](https://github.com/steveruizok/perfect-freehand-dart/pull/14).
