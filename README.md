@@ -1,4 +1,4 @@
-# ![Screenshot](https://github.com/steveruizok/perfect-freehand-dart/blob/main/doc/assets/perfect-freehand-logo.svg "Perfect Freehand")
+# ![Perfect Freehand](https://github.com/steveruizok/perfect-freehand-dart/raw/refs/heads/main/doc/assets/perfect-freehand-logo.svg)
 
 Draw perfect pressure-sensitive freehand lines.
 
@@ -21,7 +21,7 @@ Draw perfect pressure-sensitive freehand lines.
 
 This package exports a function named `getStroke` that will generate the points for a polygon based on an array of points.
 
-![Screenshot](doc/assets/process.gif "A GIF showing a stroke with input points, outline points, and a curved path connecting these points")
+![A GIF showing a stroke with input points, outline points, and a curved path connecting these points](https://github.com/steveruizok/perfect-freehand-dart/raw/refs/heads/main/doc/assets/process.gif)
 
 To do this work, `getStroke` first creates a set of spline points (red) based on the input points (grey) and then creates outline points (blue). You can render the result any way you like, using whichever technology you prefer.
 
