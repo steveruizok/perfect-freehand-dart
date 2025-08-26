@@ -1,4 +1,4 @@
-library perfect_freehand;
+library;
 
 export 'src/get_stroke_outline_points.dart';
 export 'src/get_stroke_points.dart';

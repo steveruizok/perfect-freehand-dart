@@ -76,5 +76,32 @@ void main() {
             reason: 'The pressure should not have been updated.');
       }
     });
+
+    test('with 2 points', () {
+      final points = <PointVector>[
+        const PointVector(0, 0),
+        const PointVector(100, 100),
+      ];
+
+      expect(
+        () => getStroke(
+          points,
+          options: StrokeOptions(
+            simulatePressure: true,
+            isComplete: true,
+          ),
+          rememberSimulatedPressure: true,
+        ),
+        isNot(throwsRangeError),
+        reason:
+            'rememberSimulatedPressure should handle 2 points without error: '
+            'see https://github.com/steveruizok/perfect-freehand-dart/pull/21',
+      );
+
+      expect(points, [
+        const PointVector(0, 0, 0.3208095703125),
+        const PointVector(100, 100, 0.0886337944141388),
+      ]);
+    });
   });
 }

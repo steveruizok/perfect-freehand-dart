@@ -1,4 +1,4 @@
-class StrokeEasings {
+abstract class StrokeEasings {
   /// Identity function.
   /// Returns the input value.
   static double identity(double t) => t;
