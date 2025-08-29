@@ -77,9 +77,11 @@ void main() {
     });
 
     testWidgets('L shapes', (tester) async {
-      const numStrokes = 8;
+      // Abrupt changes in direction at the end of the line need special
+      // attention. We use a full circle for the end cap to hide the corners.
+
       final options = StrokeOptions(
-        size: 100 / numStrokes * 0.8,
+        size: 10,
         smoothing: 0,
         streamline: 0,
         simulatePressure: false,
@@ -89,12 +91,8 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       final strokes = [
-        for (var i = 0.0; i <= 1.0; i += 1 / numStrokes)
-          _interpolatePoints([
-            PointVector(lerpDouble(5, 95, i)!, 5),
-            PointVector(lerpDouble(5, 95, i)!, lerpDouble(95, 5, i)!),
-            PointVector(95, lerpDouble(95, 5, i)!),
-          ]),
+        [PointVector(5, 5), PointVector(5, 95), PointVector(6, 95)],
+        [PointVector(95, 5), PointVector(95, 95), PointVector(94, 95)],
       ].map((points) => getStroke(points, options: options)).toList();
 
       await tester.pumpWidget(StrokeDrawer(strokes: strokes));
@@ -105,19 +103,4 @@ void main() {
       );
     });
   });
-}
-
-List<PointVector> _interpolatePoints(List<PointVector> points) {
-  final newPoints = <PointVector>[];
-  for (int i = 0; i < points.length - 1; ++i) {
-    final firstPoint = points[i];
-    final secondPoint = points[i + 1];
-    for (double t = 0; t <= 1; t += 1 / 32) {
-      newPoints.add(PointVector(
-        lerpDouble(firstPoint.x, secondPoint.x, t)!,
-        lerpDouble(firstPoint.y, secondPoint.y, t)!,
-      ));
-    }
-  }
-  return newPoints;
 }
