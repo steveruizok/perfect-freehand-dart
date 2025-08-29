@@ -34,7 +34,10 @@ void main() {
           return offset.dx.isNaN || offset.dy.isNaN;
         }), false, reason: 'stroke contains NaNs');
 
-        await tester.pumpWidget(StrokeDrawer(stroke: stroke));
+        await tester.pumpWidget(Padding(
+          padding: const EdgeInsets.all(8),
+          child: StrokeDrawer(stroke: stroke),
+        ));
 
         await expectLater(
           find.byType(StrokeDrawer),
