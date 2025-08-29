@@ -3,23 +3,23 @@ import 'package:flutter/material.dart';
 class StrokeDrawer extends StatelessWidget {
   const StrokeDrawer({
     super.key,
-    required this.stroke,
+    required this.strokes,
   });
 
-  final List<Offset> stroke;
+  final List<List<Offset>> strokes;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _StrokePainter(stroke),
+      painter: _StrokePainter(strokes),
     );
   }
 }
 
 class _StrokePainter extends CustomPainter {
-  _StrokePainter(this.stroke);
+  _StrokePainter(this.strokes);
 
-  final List<Offset> stroke;
+  final List<List<Offset>> strokes;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -27,18 +27,14 @@ class _StrokePainter extends CustomPainter {
       ..color = Colors.black
       ..strokeWidth = 1;
 
-    canvas.drawPath(
-      Path()
-        ..addPolygon(
-          stroke,
-          true,
-        ),
-      paint,
-    );
+    for (final stroke in strokes) {
+      canvas.drawPath(
+        Path()..addPolygon(stroke, true),
+        paint,
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(_StrokePainter oldDelegate) {
-    return oldDelegate.stroke != stroke;
-  }
+  bool shouldRepaint(_StrokePainter oldDelegate) => true;
 }
