@@ -1,3 +1,7 @@
+## 2.4.1
+
+- Round stroke end caps are now full circles again (i.e. the change from 2.4.0 was reverted). This fixes sharp corners caused by small turns at the end of a stroke: see [#23](https://github.com/steveruizok/perfect-freehand-dart/issues/23) for more details.
+
 ## 2.4.0+1
 
 - Fixed image not loading on pub.dev README
