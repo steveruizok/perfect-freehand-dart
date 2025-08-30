@@ -6,9 +6,6 @@ import 'package:perfect_freehand/src/types/point_vector.dart';
 import 'package:perfect_freehand/src/types/stroke_options.dart';
 import 'package:perfect_freehand/src/types/stroke_point.dart';
 
-// This is the rate of change for simulated pressure. It could be an option.
-const rateOfPressureChange = 0.275;
-
 /// Get an array of points representing the outline of a stroke.
 ///
 /// Used internally by `getStroke` but possibly of separate interest.
@@ -51,23 +48,14 @@ List<Offset> getStrokeOutlinePoints(
   // in order to prevent fat starts for every line.
   // Drawn lines almost always start slow!
   var prevPressure = () {
-    double acc = points.first.pressure;
+    double smoothed = points.first.pressure;
     for (final curr in points.sublist(0, min(10, points.length - 1))) {
-      final double pressure;
-      if (options.simulatePressure) {
-        // Speed of change - how fast should the pressure be changing?
-        final sp = min(1, curr.distance / options.size);
-        // Rate of change - how much of a change is there?
-        final rp = min(1, 1 - sp);
-        // Accelerate the pressure
-        pressure = min(1, acc + (rp - acc) * (sp * rateOfPressureChange));
-      } else {
-        pressure = curr.pressure;
-      }
-
-      acc = (acc + pressure) / 2;
+      final pressure = options.simulatePressure
+          ? curr.simulatePressure(smoothed, options.size)
+          : curr.pressure;
+      smoothed = (smoothed + pressure) / 2;
     }
-    return acc;
+    return smoothed;
   }();
 
   // The current radius
@@ -106,10 +94,8 @@ List<Offset> getStrokeOutlinePoints(
    */
 
   for (int i = 0; i < points.length; ++i) {
-    var pressure = points[i].pressure;
     final point = points[i].point;
     final vector = points[i].vector;
-    final distance = points[i].distance;
     final runningLength = points[i].runningLength;
 
     // Removes noise from the end of the line
@@ -126,19 +112,13 @@ List<Offset> getStrokeOutlinePoints(
      */
 
     if (options.thinning != 0) {
+      final double pressure;
       if (options.simulatePressure) {
-        // If we're simulating pressure, then do so based on the distance
-        // between the current point and the previous point, and the size
-        // of the stroke. Otherwise, use the input pressure.
-        final sp = min(1, distance / options.size);
-        final rp = min(1, 1 - sp);
-        pressure = min(1,
-            prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange));
-
-        // Update the point's pressure
-        if (rememberSimulatedPressure) {
-          points[i].updatePressure(pressure);
-        }
+        pressure = points[i].simulatePressure(prevPressure, options.size);
+        if (rememberSimulatedPressure) points[i].updatePressure(pressure);
+        prevPressure = pressure;
+      } else {
+        pressure = points[i].pressure;
       }
 
       radius = getStrokeRadius(
@@ -249,7 +229,6 @@ List<Offset> getStrokeOutlinePoints(
     }
 
     // Set variables for next iteration
-    prevPressure = pressure;
     prevVector = vector;
   }
 

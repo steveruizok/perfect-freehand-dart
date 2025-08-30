@@ -1,8 +1,21 @@
+import 'dart:math';
+
 import 'package:perfect_freehand/src/types/point_vector.dart';
+
+// This is the rate of change for simulated pressure. It could be an option.
+const rateOfPressureChange = 0.275;
 
 /// The points returned by [getStrokePoints]
 /// and the input for [getStrokeOutlinePoints].
 class StrokePoint {
+  StrokePoint({
+    required this.point,
+    required void Function(double)? updatePressure,
+    required this.distance,
+    required this.vector,
+    required this.runningLength,
+  }) : _updatePressure = updatePressure;
+
   /// The adjusted point.
   PointVector point;
 
@@ -28,11 +41,19 @@ class StrokePoint {
   /// The total distance so far.
   final double runningLength;
 
-  StrokePoint({
-    required this.point,
-    required void Function(double)? updatePressure,
-    required this.distance,
-    required this.vector,
-    required this.runningLength,
-  }) : _updatePressure = updatePressure;
+  /// Simulates pressure based on the [distance] from the previous point,
+  /// the previous point's pressure, and the [size] from `StrokeOptions`.
+  ///
+  /// This function does not mutate the [point] or its [pressure].
+  /// Use [updatePressure] to update the point's pressure if needed.
+  double simulatePressure(double prevPressure, double size) {
+    // Speed of change - how fast should the pressure be changing?
+    final sp = min(1.0, distance / size);
+    // Rate of change - how much of a change is there?
+    final rp = min(1.0, 1.0 - sp);
+    // Accelerate the pressure
+    final pressure = min(
+        1.0, prevPressure + (rp - prevPressure) * (sp * rateOfPressureChange));
+    return pressure;
+  }
 }
