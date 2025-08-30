@@ -9,9 +9,6 @@ import 'package:perfect_freehand/src/types/stroke_point.dart';
 // This is the rate of change for simulated pressure. It could be an option.
 const rateOfPressureChange = 0.275;
 
-// Browser strokes seem to be off if PI is regular, a tiny offset seems to fix it
-const fixedPi = pi + 0.0001;
-
 /// Get an array of points representing the outline of a stroke.
 ///
 /// Used internally by `getStroke` but possibly of separate interest.
@@ -199,10 +196,10 @@ List<Offset> getStrokeOutlinePoints(
 
       const step = 1 / 13;
       for (double t = 0; t <= 1; t += step) {
-        tl = (point - offset).rotAround(point, fixedPi * t);
+        tl = (point - offset).rotAround(point, pi * t);
         leftPoints.add(tl);
 
-        tr = (point + offset).rotAround(point, fixedPi * -t);
+        tr = (point + offset).rotAround(point, pi * -t);
         rightPoints.add(tr);
       }
 
@@ -289,7 +286,7 @@ List<Offset> getStrokeOutlinePoints(
       final List<PointVector> dotPts = [];
       const step = 1 / 13;
       for (double t = step; t <= 1; t += step) {
-        dotPts.add(start.rotAround(firstPoint, fixedPi * 2 * t));
+        dotPts.add(start.rotAround(firstPoint, pi * 2 * t));
       }
       return dotPts;
     }
@@ -310,7 +307,7 @@ List<Offset> getStrokeOutlinePoints(
       // around the start point to the left point
       const step = 1 / 13;
       for (double t = step; t <= 1; t += step) {
-        final pt = rightPoints.first.rotAround(firstPoint, fixedPi * t);
+        final pt = rightPoints.first.rotAround(firstPoint, pi * t);
         startCap.add(pt);
       }
     } else {
@@ -347,7 +344,7 @@ List<Offset> getStrokeOutlinePoints(
     final start = lastPoint.project(direction, radius);
     const step = 1 / 29;
     for (double t = step; t <= 1; t += step) {
-      endCap.add(start.rotAround(lastPoint, fixedPi * 3 * t));
+      endCap.add(start.rotAround(lastPoint, pi * 3 * t));
     }
   } else {
     // Draw the flat end cap
