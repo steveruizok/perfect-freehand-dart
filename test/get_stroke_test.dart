@@ -127,13 +127,11 @@ void main() {
         [PointVector(90, 5), PointVector(90, 45), PointVector(95, 55)],
       ];
 
+      // Mirror strokes so left turns and right turns are both tested.
       final unmirroredLength = rawStrokes.length;
       for (var i = 0; i < unmirroredLength; i++) {
         rawStrokes.add(
-          rawStrokes[i]
-              .reversed
-              .map((p) => PointVector(p.dx, 120 - p.dy))
-              .toList(),
+          rawStrokes[i].map((p) => PointVector(p.dx, 120 - p.dy)).toList(),
         );
       }
 
