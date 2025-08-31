@@ -164,8 +164,12 @@ List<Offset> getStrokeOutlinePoints(
     final nextDpr = i < points.length - 1 ? vector.dpr(nextVector) : 1.0;
     final prevDpr = vector.dpr(prevVector);
 
-    final isPointSharpCorner = prevDpr < 0.1 && !isPrevPointSharpCorner;
-    final isNextPointSharpCorner = nextDpr < 0.1;
+    // dpr<0 is acute, dpr=0 is 90deg, dpr>0 is obtuse.
+    // We accept slightly obtuse angles as sharp corners, ie. dpr<this:
+    final maxDprForSharpCorner = pow(options.size, 2) / 1024;
+    final isPointSharpCorner =
+        prevDpr < maxDprForSharpCorner && !isPrevPointSharpCorner;
+    final isNextPointSharpCorner = nextDpr < maxDprForSharpCorner;
 
     if (isPointSharpCorner || isNextPointSharpCorner) {
       // It's a sharp corner. Draw a rounded cap and move on to the next point
