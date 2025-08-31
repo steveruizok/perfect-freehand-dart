@@ -169,7 +169,7 @@ List<Offset> getStrokeOutlinePoints(
 
     // dpr<0 is acute, dpr=0 is 90deg, dpr>0 is obtuse.
     // We accept slightly obtuse angles as sharp corners, ie. dpr<this:
-    final maxDprForSharpCorner = pow(options.size, 2) / 1024;
+    final maxDprForSharpCorner = options.size / 128;
     final isPointSharpCorner =
         prevDpr < maxDprForSharpCorner && !isPrevPointSharpCorner;
     final isNextPointSharpCorner = nextDpr < maxDprForSharpCorner;
