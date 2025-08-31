@@ -72,7 +72,7 @@ List<Offset> getStrokeOutlinePoints(
   // Previous vector
   var prevVector = points.first.vector;
 
-  // Previous left and right points
+  // Previous left and right points, used to prevent outline points too close together
   var pl = points.first.point;
   var pr = pl;
 
@@ -172,19 +172,24 @@ List<Offset> getStrokeOutlinePoints(
       // Considering saving these and drawing them later? So that we can avoid
       // crossing future points.
 
-      final offset = prevVector.perpendicular() * radius;
-
+      final prevOffset = prevVector.perpendicular() * radius;
       const step = 1 / 13;
       for (double t = 0; t <= 1; t += step) {
-        tl = (point - offset).rotAround(point, pi * t);
+        tl = (point - prevOffset).rotAround(point, pi * t);
         leftPoints.add(tl);
 
-        tr = (point + offset).rotAround(point, pi * -t);
+        tr = (point + prevOffset).rotAround(point, pi * -t);
         rightPoints.add(tr);
       }
 
-      pl = tl;
-      pr = tr;
+      // Flip left and right since direction is changing
+      final nextOffset = nextVector.perpendicular() * radius;
+      tl = (point + nextOffset).rotAround(point, -pi);
+      tr = (point - nextOffset).rotAround(point, pi);
+      leftPoints.add(tl);
+      rightPoints.add(tr);
+      pl = tr;
+      pr = tl;
 
       if (isNextPointSharpCorner) {
         isPrevPointSharpCorner = true;
