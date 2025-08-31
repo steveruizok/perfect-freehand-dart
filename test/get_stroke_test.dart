@@ -114,7 +114,7 @@ void main() {
           const Size(100, 100) * tester.view.devicePixelRatio;
       addTearDown(tester.view.resetPhysicalSize);
 
-      final strokes = [
+      final rawStrokes = [
         // very accute
         [PointVector(5, 5), PointVector(5, 45), PointVector(10, 40)],
         // slightly accute
@@ -125,7 +125,21 @@ void main() {
         [PointVector(65, 5), PointVector(65, 45), PointVector(75, 55)],
         // very obtuse
         [PointVector(90, 5), PointVector(90, 45), PointVector(95, 55)],
-      ].map((points) => getStroke(points, options: options)).toList();
+      ];
+
+      final unmirroredLength = rawStrokes.length;
+      for (var i = 0; i < unmirroredLength; i++) {
+        rawStrokes.add(
+          rawStrokes[i]
+              .reversed
+              .map((p) => PointVector(p.dx, 120 - p.dy))
+              .toList(),
+        );
+      }
+
+      final strokes = rawStrokes
+          .map((points) => getStroke(points, options: options))
+          .toList();
 
       await tester.pumpWidget(StrokeDrawer(strokes: strokes));
 

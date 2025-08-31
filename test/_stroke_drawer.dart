@@ -35,6 +35,16 @@ class _StrokePainter extends CustomPainter {
         Path()..addPolygon(stroke, true),
         Paint()..color = Colors.black.withValues(alpha: 0.5),
       );
+    }
+
+    final strokeColors = [
+      Color.fromARGB(255, 255, 0, 0),
+      Color.fromARGB(255, 0, 255, 0),
+      Color.fromARGB(255, 0, 0, 255),
+    ];
+    for (var i = 0; i < strokes.length; i++) {
+      final stroke = strokes[i];
+      final strokeColor = strokeColors[i % strokeColors.length];
       canvas.drawPoints(
         PointMode.lines,
         [
@@ -44,7 +54,7 @@ class _StrokePainter extends CustomPainter {
           ],
         ],
         Paint()
-          ..color = Color.fromARGB(255, 255, 0, 0).withValues(alpha: 0.3)
+          ..color = strokeColor.withValues(alpha: 0.3)
           ..strokeWidth = 0.5,
       );
     }
