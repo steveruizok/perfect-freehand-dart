@@ -27,11 +27,9 @@ void main() {
         0.11666438883169417, 0.1163410248643386, 0.11620569325911113,
 
         // The points at (100, 100)
-        null, null, null, null, null, null, 0.11838510316112387,
+        0.11614970754231796, null, null, null, null, null, 0.11832925693335052,
       ];
-      for (var i = 0; i < points.length; i++) {
-        expect(points[i].pressure, expectedPressures[i]);
-      }
+      expect(points.map((p) => p.pressure), expectedPressures);
 
       // Now see if we can get roughly the same stroke back
       // using the remembered pressure.

@@ -99,7 +99,10 @@ List<Offset> getStrokeOutlinePoints(
     final runningLength = points[i].runningLength;
 
     // Removes noise from the end of the line
-    if (i < points.length - 1 && totalLength - runningLength < options.size) {
+    if (i < points.length - 1 &&
+        options.isComplete && // prevent artifacts while drawing
+        !isPrevPointSharpCorner &&
+        totalLength - runningLength < options.size / 2) {
       continue;
     }
 
