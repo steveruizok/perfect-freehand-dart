@@ -48,14 +48,14 @@ class PointVector extends Offset {
     double t,
     PointVector other,
   ) {
-    // avoid null values
+    // avoid null x and y values
     if (!isFinite) return other;
     if (!other.isFinite) return this;
 
     return PointVector(
       lerpDouble(x, other.x, t)!,
       lerpDouble(y, other.y, t)!,
-      lerpDouble(pressure, other.pressure, t) ?? pressure ?? 0.5,
+      lerpDouble(pressure ?? other.pressure, other.pressure ?? pressure, t),
     );
   }
 
