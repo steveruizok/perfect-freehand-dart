@@ -1,3 +1,17 @@
+## 2.5.0
+
+- Fix: Path segments (separated by sharp angles) are now properly connected, preventing unexpected thinness at elbows.
+- Fix: Right angles are now properly treated as sharp angles (so the corner can be rounded out).
+- Fix: Less detail is lost near the end of a stroke. This results in less flickering while drawing.
+- Fix: `PointVector.lerp` better handles the case when one point has a non-null pressure and the other has a null pressure.
+
+Before and after with sharp corners:
+<img width="300" height="180" alt="v2.4.0" src="https://github.com/user-attachments/assets/46951a57-3f29-4792-97fd-3383627aa5f0" />
+<img width="300" height="180" alt="v2.5.0" src="https://github.com/user-attachments/assets/110267f5-3dfd-4223-bb06-30accbaf4146" />
+
+You can see more before/after comparison images in the [Fix elbows and sharp corners, #24](https://github.com/steveruizok/perfect-freehand-dart/pull/24) pull request.
+As always, you can demo the new version in the [online demo](https://steveruizok.github.io/perfect-freehand-dart/).
+
 ## 2.4.1
 
 - Round stroke end caps are now full circles again (i.e. the change from 2.4.0 was reverted). This fixes sharp corners caused by small turns at the end of a stroke: see [#23](https://github.com/steveruizok/perfect-freehand-dart/issues/23) for more details.
