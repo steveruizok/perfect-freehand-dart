@@ -102,5 +102,49 @@ void main() {
         matchesGoldenFile('example_inputs/L_shapes.png'),
       );
     });
+
+    testWidgets('Sharp corners', (tester) async {
+      final options = StrokeOptions(
+        size: 10,
+        smoothing: 0,
+        streamline: 0,
+        simulatePressure: false,
+      );
+      tester.view.physicalSize =
+          const Size(100, 100) * tester.view.devicePixelRatio;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final rawStrokes = [
+        // very accute
+        [PointVector(5, 5), PointVector(5, 45), PointVector(10, 40)],
+        // slightly accute
+        [PointVector(25, 5), PointVector(25, 45), PointVector(35, 40)],
+        // right angle
+        [PointVector(45, 5), PointVector(45, 45), PointVector(55, 45)],
+        // slightly obtuse
+        [PointVector(65, 5), PointVector(65, 45), PointVector(75, 55)],
+        // very obtuse
+        [PointVector(90, 5), PointVector(90, 45), PointVector(95, 55)],
+      ];
+
+      // Mirror strokes so left turns and right turns are both tested.
+      final unmirroredLength = rawStrokes.length;
+      for (var i = 0; i < unmirroredLength; i++) {
+        rawStrokes.add(
+          rawStrokes[i].map((p) => PointVector(p.dx, 120 - p.dy)).toList(),
+        );
+      }
+
+      final strokes = rawStrokes
+          .map((points) => getStroke(points, options: options))
+          .toList();
+
+      await tester.pumpWidget(StrokeDrawer(strokes: strokes));
+
+      await expectLater(
+        find.byType(StrokeDrawer),
+        matchesGoldenFile('example_inputs/sharp_corners.png'),
+      );
+    });
   });
 }

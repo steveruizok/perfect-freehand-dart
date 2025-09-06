@@ -72,7 +72,7 @@ List<Offset> getStrokeOutlinePoints(
   // Previous vector
   var prevVector = points.first.vector;
 
-  // Previous left and right points
+  // Previous left and right points, used to prevent outline points too close together
   var pl = points.first.point;
   var pr = pl;
 
@@ -99,7 +99,10 @@ List<Offset> getStrokeOutlinePoints(
     final runningLength = points[i].runningLength;
 
     // Removes noise from the end of the line
-    if (i < points.length - 1 && totalLength - runningLength < options.size) {
+    if (i < points.length - 1 &&
+        options.isComplete && // prevent artifacts while drawing
+        !isPrevPointSharpCorner &&
+        totalLength - runningLength < options.size / 2) {
       continue;
     }
 
@@ -164,27 +167,36 @@ List<Offset> getStrokeOutlinePoints(
     final nextDpr = i < points.length - 1 ? vector.dpr(nextVector) : 1.0;
     final prevDpr = vector.dpr(prevVector);
 
-    final isPointSharpCorner = prevDpr < 0 && !isPrevPointSharpCorner;
-    final isNextPointSharpCorner = nextDpr < 0;
+    // dpr<0 is acute, dpr=0 is 90deg, dpr>0 is obtuse.
+    // We accept slightly obtuse angles as sharp corners, ie. dpr<this:
+    final maxDprForSharpCorner = options.size / 128;
+    final isPointSharpCorner =
+        prevDpr < maxDprForSharpCorner && !isPrevPointSharpCorner;
+    final isNextPointSharpCorner = nextDpr < maxDprForSharpCorner;
 
     if (isPointSharpCorner || isNextPointSharpCorner) {
       // It's a sharp corner. Draw a rounded cap and move on to the next point
       // Considering saving these and drawing them later? So that we can avoid
       // crossing future points.
 
-      final offset = prevVector.perpendicular() * radius;
-
+      final prevOffset = prevVector.perpendicular() * radius;
       const step = 1 / 13;
       for (double t = 0; t <= 1; t += step) {
-        tl = (point - offset).rotAround(point, pi * t);
+        tl = (point - prevOffset).rotAround(point, pi * t);
         leftPoints.add(tl);
 
-        tr = (point + offset).rotAround(point, pi * -t);
+        tr = (point + prevOffset).rotAround(point, pi * -t);
         rightPoints.add(tr);
       }
 
-      pl = tl;
-      pr = tr;
+      // Flip left and right since direction is changing
+      final nextOffset = nextVector.perpendicular() * radius;
+      tl = (point + nextOffset).rotAround(point, -pi);
+      tr = (point - nextOffset).rotAround(point, pi);
+      leftPoints.add(tl);
+      rightPoints.add(tr);
+      pl = tr;
+      pr = tl;
 
       if (isNextPointSharpCorner) {
         isPrevPointSharpCorner = true;
