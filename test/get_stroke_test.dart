@@ -38,7 +38,7 @@ void main() {
 
         await tester.pumpWidget(Padding(
           padding: const EdgeInsets.all(8),
-          child: StrokeDrawer(strokes: [stroke]),
+          child: StrokeDrawer(strokes: {entry.value: stroke}),
         ));
 
         await expectLater(
@@ -60,13 +60,13 @@ void main() {
           const Size(100, 100) * tester.view.devicePixelRatio;
       addTearDown(tester.view.resetPhysicalSize);
 
-      final strokes = [
+      final strokes = Map.fromEntries([
         for (var i = 0.0; i <= 1.0; i += 1 / numStrokes)
           [
             PointVector(lerpDouble(5, 95, i)!, 5),
             PointVector(lerpDouble(5, 95, i)!, lerpDouble(95, 5, i)!),
           ],
-      ].map((points) => getStroke(points, options: options)).toList();
+      ].map((points) => MapEntry(points, getStroke(points, options: options))));
 
       await tester.pumpWidget(StrokeDrawer(strokes: strokes));
 
@@ -90,10 +90,10 @@ void main() {
           const Size(100, 100) * tester.view.devicePixelRatio;
       addTearDown(tester.view.resetPhysicalSize);
 
-      final strokes = [
+      final strokes = Map.fromEntries([
         [PointVector(5, 5), PointVector(5, 95), PointVector(6, 95)],
         [PointVector(95, 5), PointVector(95, 95), PointVector(94, 95)],
-      ].map((points) => getStroke(points, options: options)).toList();
+      ].map((points) => MapEntry(points, getStroke(points, options: options))));
 
       await tester.pumpWidget(StrokeDrawer(strokes: strokes));
 
@@ -135,9 +135,10 @@ void main() {
         );
       }
 
-      final strokes = rawStrokes
-          .map((points) => getStroke(points, options: options))
-          .toList();
+      final strokes = {
+        for (var points in rawStrokes)
+          points: getStroke(points, options: options)
+      };
 
       await tester.pumpWidget(StrokeDrawer(strokes: strokes));
 
