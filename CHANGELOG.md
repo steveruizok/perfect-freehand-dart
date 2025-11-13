@@ -1,3 +1,7 @@
+## 2.5.1
+
+- Fix: Fixed NaN values appearing with some inputs, especially those with non-null pressure values.
+
 ## 2.5.0
 
 - Fix: Path segments (separated by sharp angles) are now properly connected, preventing unexpected thinness at elbows.
