@@ -90,6 +90,8 @@ class PointVector extends Offset {
   PointVector unitVectorTo(PointVector other) {
     final dx = other.x - x;
     final dy = other.y - y;
+    if (dx == 0 && dy == 0) return PointVector.zero; // Avoid division by zero
+
     final distance = sqrt(dx * dx + dy * dy);
     return PointVector(
       dx / distance,
