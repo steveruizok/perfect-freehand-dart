@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -32,9 +33,8 @@ void main() {
 
         final stroke = getStroke(entry.value);
 
-        expect(stroke.any((offset) {
-          return offset.dx.isNaN || offset.dy.isNaN;
-        }), false, reason: 'stroke contains NaNs');
+        expect(stroke.every((offset) => offset.isFinite), true,
+            reason: 'stroke should not contain NaN');
 
         await tester.pumpWidget(Padding(
           padding: const EdgeInsets.all(8),
@@ -45,6 +45,21 @@ void main() {
           find.byType(StrokeDrawer),
           matchesGoldenFile('example_inputs/${entry.key}.png'),
         );
+      });
+    }
+
+    for (final entry in _exampleInputs.entries) {
+      testWidgets('no NaNs in ${entry.key} with non-simulated pressures',
+          (tester) async {
+        final random = Random(123);
+        final stroke = getStroke(
+          entry.value
+              .map((point) => point.copyWith(pressure: random.nextDouble()))
+              .toList(),
+        );
+        for (final offset in stroke) {
+          expect(offset.isFinite, true, reason: '$offset should not be NaN');
+        }
       });
     }
 
