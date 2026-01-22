@@ -214,6 +214,19 @@ class StrokeEndOptions {
           easing: easing ?? StrokeEasings.easeOutCubic,
         );
 
+  StrokeEndOptions copyWith({
+    bool? cap,
+    bool? taperEnabled,
+    required double? customTaper,
+    double Function(double)? easing,
+  }) =>
+      StrokeEndOptions._(
+        cap: cap ?? this.cap,
+        taperEnabled: taperEnabled ?? this.taperEnabled,
+        customTaper: customTaper,
+        easing: easing ?? this.easing,
+      );
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

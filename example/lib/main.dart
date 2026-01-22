@@ -1,207 +1,213 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
-import 'package:perfect_freehand_example/toolbar.dart';
+
+import 'components/footer.dart';
+import 'components/header.dart';
+import 'components/menu.dart';
+import 'util/theme.dart';
 
 void main() {
-  runApp(
-    MaterialApp(
-      title: 'Drawing App',
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        colorSchemeSeed: Colors.blue,
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        colorSchemeSeed: Colors.blue,
-      ),
-      home: const DemoDrawingApp(),
-    ),
-  );
+  runApp(const DemoApp());
 }
 
-class DemoDrawingApp extends StatefulWidget {
-  const DemoDrawingApp({super.key});
+class DemoApp extends StatelessWidget {
+  const DemoApp({super.key});
 
   @override
-  State<DemoDrawingApp> createState() => _DemoDrawingAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'perfect_freehand',
+      theme: createTheme(brightness: .light),
+      darkTheme: createTheme(brightness: .dark),
+      home: const DemoPage(),
+    );
+  }
 }
 
-class _DemoDrawingAppState extends State<DemoDrawingApp> {
-  StrokeOptions options = StrokeOptions(
-    size: 16,
-    thinning: 0.7,
-    smoothing: 0.5,
-    streamline: 0.5,
-    start: StrokeEndOptions.start(
-      taperEnabled: true,
-      customTaper: 0.0,
-      cap: true,
-    ),
-    end: StrokeEndOptions.end(
-      taperEnabled: true,
-      customTaper: 0.0,
-      cap: true,
-    ),
-    simulatePressure: true,
-    isComplete: false,
-  );
+class DemoPage extends HookWidget {
+  const DemoPage({super.key});
 
-  /// Previous lines drawn.
-  final lines = ValueNotifier(<Stroke>[]);
+  @override
+  Widget build(BuildContext context) {
+    final showMenu = useState(true);
+    final strokeOptions = useState(StrokeOptions());
+    final controller = useMemoized(CanvasController.new);
 
-  /// The current line being drawn.
-  final line = ValueNotifier<Stroke?>(null);
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: CanvasWidget(
+              strokeOptions: strokeOptions,
+              controller: controller,
+            ),
+          ),
+          Column(
+            crossAxisAlignment: .start,
+            children: [
+              Center(child: Header()),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.bottomStart,
+                  child: IgnorePointer(
+                    ignoring: !showMenu.value,
+                    child: AnimatedOpacity(
+                      opacity: showMenu.value ? 1 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      child: Menu(strokeOptions: strokeOptions),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 64),
+            ],
+          ),
+        ],
+      ),
+      floatingActionButton: Footer(showMenu: showMenu, controller: controller),
+      floatingActionButtonLocation: .startFloat,
+    );
+  }
+}
 
-  void clear() => setState(() {
-        lines.value = [];
-        line.value = null;
-      });
+class CanvasWidget extends HookWidget {
+  const CanvasWidget({
+    super.key,
+    required this.strokeOptions,
+    required this.controller,
+  });
+
+  final ValueNotifier<StrokeOptions> strokeOptions;
+  final CanvasController controller;
 
   void onPointerDown(PointerDownEvent details) {
-    final supportsPressure = details.kind == PointerDeviceKind.stylus;
-    options = options.copyWith(simulatePressure: !supportsPressure);
-
-    final localPosition = details.localPosition;
     final point = PointVector(
-      localPosition.dx,
-      localPosition.dy,
-      supportsPressure ? details.pressure : null,
+      details.localPosition.dx,
+      details.localPosition.dy,
+      details.pressure,
     );
-
-    line.value = Stroke([point]);
+    controller.currentStroke = DemoStroke([point]);
   }
 
   void onPointerMove(PointerMoveEvent details) {
-    final supportsPressure = details.pressureMin < 1;
-    final localPosition = details.localPosition;
     final point = PointVector(
-      localPosition.dx,
-      localPosition.dy,
-      supportsPressure ? details.pressure : null,
+      details.localPosition.dx,
+      details.localPosition.dy,
+      details.pressure,
     );
-
-    line.value = Stroke([...line.value!.points, point]);
+    controller.currentStroke = DemoStroke([
+      ...controller.currentStroke!.points,
+      point,
+    ]);
   }
 
   void onPointerUp(PointerUpEvent details) {
-    lines.value = [...lines.value, line.value!];
-    line.value = null;
+    controller.strokes = [...controller.strokes, controller.currentStroke!];
+    controller.currentStroke = null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      body: Listener(
-        onPointerDown: onPointerDown,
-        onPointerMove: onPointerMove,
-        onPointerUp: onPointerUp,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ValueListenableBuilder(
-                valueListenable: lines,
-                builder: (context, lines, _) {
-                  return CustomPaint(
-                    painter: StrokePainter(
-                      color: colorScheme.onSurface,
-                      lines: lines,
-                      options: options,
-                    ),
-                  );
-                },
-              ),
-            ),
-            Positioned.fill(
-              child: ValueListenableBuilder(
-                valueListenable: line,
-                builder: (context, line, _) {
-                  return CustomPaint(
-                    painter: StrokePainter(
-                      color: colorScheme.onSurface,
-                      lines: line == null ? [] : [line],
-                      options: options,
-                    ),
-                  );
-                },
-              ),
-            ),
-            Toolbar(
-              options: options,
-              updateOptions: setState,
-              clear: clear,
-            ),
-          ],
+    useListenable(controller);
+    final strokeOptions = useValueListenable(this.strokeOptions);
+    final strokeColor = ColorScheme.of(context).onSurface;
+    return Listener(
+      onPointerDown: (details) => onPointerDown(details),
+      onPointerMove: (details) => onPointerMove(details),
+      onPointerUp: (details) => onPointerUp(details),
+      child: CustomPaint(
+        painter: StrokePainter(
+          strokeOptions: strokeOptions,
+          color: strokeColor,
+          strokes: controller.strokes,
+        ),
+        foregroundPainter: StrokePainter(
+          strokeOptions: strokeOptions,
+          color: strokeColor,
+          strokes: [?controller.currentStroke],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    lines.dispose();
-    line.dispose();
-    super.dispose();
   }
 }
 
 class StrokePainter extends CustomPainter {
   const StrokePainter({
+    required this.strokeOptions,
     required this.color,
-    required this.lines,
-    required this.options,
+    required this.strokes,
   });
 
+  final StrokeOptions strokeOptions;
   final Color color;
-  final List<Stroke> lines;
-  final StrokeOptions options;
+  final List<DemoStroke> strokes;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color;
-
-    for (final line in lines) {
-      final outlinePoints = getStroke(line.points, options: options);
-
-      if (outlinePoints.isEmpty) {
-        continue;
-      } else if (outlinePoints.length < 2) {
-        // If the path only has one point, draw a dot.
-        canvas.drawCircle(
-          outlinePoints.first,
-          options.size / 2,
-          paint,
-        );
-      } else {
-        final path = Path();
-        path.moveTo(outlinePoints.first.dx, outlinePoints.first.dy);
-        for (int i = 0; i < outlinePoints.length - 1; ++i) {
-          final p0 = outlinePoints[i];
-          final p1 = outlinePoints[i + 1];
-          path.quadraticBezierTo(
-            p0.dx,
-            p0.dy,
-            (p0.dx + p1.dx) / 2,
-            (p0.dy + p1.dy) / 2,
-          );
-        }
-        // You'll see performance improvements if you cache this Path
-        // instead of creating a new one every paint.
-        canvas.drawPath(path, paint);
-      }
+    for (final stroke in strokes) {
+      canvas.drawPath(stroke.createPath(strokeOptions), paint);
     }
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(StrokePainter oldDelegate) =>
+      oldDelegate != this || strokes != oldDelegate.strokes;
 }
 
-class Stroke {
+class CanvasController extends ChangeNotifier {
+  List<DemoStroke> get strokes => _strokes;
+  List<DemoStroke> _strokes = <DemoStroke>[];
+  set strokes(List<DemoStroke> value) {
+    _strokes = value;
+    notifyListeners();
+  }
+
+  DemoStroke? get currentStroke => _currentStroke;
+  DemoStroke? _currentStroke;
+  set currentStroke(DemoStroke? value) {
+    _currentStroke = value;
+    notifyListeners();
+  }
+
+  void undo() {
+    strokes.removeLast();
+    notifyListeners();
+  }
+
+  void clear() {
+    strokes = [];
+    currentStroke = null;
+  }
+}
+
+class DemoStroke {
+  DemoStroke(this.points);
+
   final List<PointVector> points;
 
-  const Stroke(this.points);
+  /// For demo purposes, we aren't caching the result so the user can adjust
+  /// the stroke options for all strokes at once.
+  /// In a real app, you should store the resulting Path and only recreate it
+  /// if the input points changed.
+  Path createPath(StrokeOptions strokeOptions) {
+    final outlinePoints = getStroke(points, options: strokeOptions);
+
+    final path = Path();
+    if (outlinePoints.isEmpty) return path;
+    path.moveTo(outlinePoints.first.dx, outlinePoints.first.dy);
+    for (int i = 0; i < outlinePoints.length - 1; ++i) {
+      final p0 = outlinePoints[i];
+      final p1 = outlinePoints[i + 1];
+      path.quadraticBezierTo(
+        p0.dx,
+        p0.dy,
+        (p0.dx + p1.dx) / 2,
+        (p0.dy + p1.dy) / 2,
+      );
+    }
+    return path;
+  }
 }
