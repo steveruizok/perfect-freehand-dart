@@ -83,19 +83,21 @@ class CanvasWidget extends HookWidget {
   final CanvasController controller;
 
   void onPointerDown(PointerDownEvent details) {
+    final pressureSensitive = details.pressureMin < 1;
     final point = PointVector(
       details.localPosition.dx,
       details.localPosition.dy,
-      details.pressure,
+      pressureSensitive ? details.pressure : null,
     );
     controller.currentStroke = DemoStroke([point]);
   }
 
   void onPointerMove(PointerMoveEvent details) {
+    final pressureSensitive = details.pressureMin < 1;
     final point = PointVector(
       details.localPosition.dx,
       details.localPosition.dy,
-      details.pressure,
+      pressureSensitive ? details.pressure : null,
     );
     controller.currentStroke = DemoStroke([
       ...controller.currentStroke!.points,
