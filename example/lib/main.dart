@@ -5,7 +5,9 @@ import 'package:perfect_freehand/perfect_freehand.dart';
 import 'components/footer.dart';
 import 'components/header.dart';
 import 'components/menu.dart';
+import 'util/hey.dart';
 import 'util/theme.dart';
+import 'util/transform_stroke.dart';
 
 void main() {
   runApp(const DemoApp());
@@ -32,7 +34,9 @@ class DemoPage extends HookWidget {
   Widget build(BuildContext context) {
     final showMenu = useState(true);
     final strokeOptions = useState(StrokeOptions());
-    final controller = useMemoized(CanvasController.new);
+    final controller = useMemoized(
+      () => CanvasController(screenSize: MediaQuery.sizeOf(context)),
+    );
 
     return Scaffold(
       body: Stack(
@@ -160,6 +164,11 @@ class StrokePainter extends CustomPainter {
 }
 
 class CanvasController extends ChangeNotifier {
+  CanvasController({required Size screenSize}) {
+    final heyStroke = transformExampleStroke(hey, screenSize);
+    _strokes.add(heyStroke);
+  }
+
   List<DemoStroke> get strokes => _strokes;
   List<DemoStroke> _strokes = <DemoStroke>[];
   set strokes(List<DemoStroke> value) {

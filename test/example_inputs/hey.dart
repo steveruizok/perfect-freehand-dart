@@ -1,4 +1,4 @@
-import 'package:perfect_freehand/src/types/point_vector.dart';
+import 'package:perfect_freehand/perfect_freehand.dart';
 
 const hey = [
   PointVector(546.25, 417.86),
