@@ -114,7 +114,7 @@ This object accepts the following properties:
 | `simulatePressure`   | bool             | true    | Whether to simulate pressure based on distance between points, or else use the provided PointVectors' pressures. |
 | `isComplete`         | bool             | true    | Whether the stroke is complete.                                                                                  |
 | `start`              | StrokeEndOptions |         | How far to taper the start of the line.                                                                          |
-| `end     `           | StrokeEndOptions |         | How far to taper the end of the line.                                                                            |
+| `end`                | StrokeEndOptions |         | How far to taper the end of the line.                                                                            |
 | `start.cap`          | bool             | true    | Whether to cap the start of the line.                                                                            |
 | `start.taperEnabled` | bool             | false   | Whether to taper the start of the line.                                                                          |
 | `start.customTaper`  | double           | null    | A custom taper value for the start of the line, defaults to the total running length.                            |

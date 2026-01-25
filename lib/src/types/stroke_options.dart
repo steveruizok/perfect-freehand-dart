@@ -20,12 +20,16 @@ class StrokeOptions {
   /// How much to soften the stroke's edges.
   double smoothing;
 
+  /// How much to remove variation from the input points.
   double streamline;
 
   /// An easing function to apply to each point's pressure.
   double Function(double) easing;
 
   /// Whether to simulate pressure based on velocity.
+  ///
+  /// If false, the input point's pressures will be used as-is.
+  /// If true, the input point's pressures are not used at all.
   bool simulatePressure;
 
   /// Cap, taper, and easing for the start of the line.
@@ -35,6 +39,9 @@ class StrokeOptions {
   StrokeEndOptions end;
 
   /// Whether to handle the points as a completed stroke.
+  ///
+  /// When [isComplete] is false, the line's end will be drawn slightly behind
+  /// the last input point.
   bool isComplete;
 
   StrokeOptions({
@@ -159,12 +166,19 @@ class StrokeEndOptions {
   static bool defaultTaperEnabled = false;
 
   /// Whether to cap the line.
+  ///
+  /// This has no effect if [taperEnabled] is true.
   bool cap;
 
   /// Whether to taper the start of the line.
+  ///
+  /// See [customTaper] to customize the taper.
   bool taperEnabled;
 
-  /// A custom taper value for the start of the line, defaults to the total running length.
+  /// A custom taper value for the start of the line,
+  /// defaults to the total running length.
+  ///
+  /// This has no effect if [taperEnabled] is false.
   ///
   /// For convenience, if [customTaper] is set to `0` in the constructor,
   /// [taperEnabled] will be set to `false`.
