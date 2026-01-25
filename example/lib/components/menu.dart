@@ -16,7 +16,7 @@ class Menu extends HookWidget {
       padding: .all(16),
       margin: .all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
+        color: colorScheme.surfaceContainer.withValues(alpha: 0.96),
         borderRadius: .circular(16),
       ),
       child: SingleChildScrollView(
@@ -233,22 +233,25 @@ class _SliderRow extends StatelessWidget {
       title: title,
       children: [
         Expanded(
-          child: SliderTheme(
-            data: SliderThemeData(
-              showValueIndicator: ShowValueIndicator.onDrag,
-              // ignore: deprecated_member_use
-              year2023: false,
-              trackHeight: 8,
-              thumbSize: thumbSize,
-              padding: .symmetric(horizontal: 8),
-            ),
-            child: Slider(
-              value: value,
-              min: min,
-              max: max,
-              divisions: 50,
-              label: label,
-              onChanged: onChanged,
+          child: SizedBox(
+            height: 32,
+            child: SliderTheme(
+              data: SliderThemeData(
+                showValueIndicator: .never,
+                // ignore: deprecated_member_use
+                year2023: false,
+                trackHeight: 8,
+                thumbSize: thumbSize,
+                padding: .symmetric(horizontal: 8),
+              ),
+              child: Slider(
+                value: value,
+                min: min,
+                max: max,
+                divisions: 20,
+                label: label,
+                onChanged: onChanged,
+              ),
             ),
           ),
         ),
@@ -259,11 +262,11 @@ class _SliderRow extends StatelessWidget {
 
   WidgetStateProperty<Size> get thumbSize {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) return const Size(4, 32);
-      if (states.contains(WidgetState.hovered)) return const Size(4, 32);
-      if (states.contains(WidgetState.focused)) return const Size(2, 32);
-      if (states.contains(WidgetState.pressed)) return const Size(2, 32);
-      return const Size(4, 32);
+      if (states.contains(WidgetState.disabled)) return const Size(4, 28);
+      if (states.contains(WidgetState.hovered)) return const Size(4, 28);
+      if (states.contains(WidgetState.focused)) return const Size(2, 28);
+      if (states.contains(WidgetState.pressed)) return const Size(2, 28);
+      return const Size(4, 28);
     });
   }
 }
@@ -284,8 +287,8 @@ class _CheckboxRow extends StatelessWidget {
     return _MenuRow(
       title: title,
       children: [
-        Padding(
-          padding: .symmetric(vertical: 4),
+        SizedBox.square(
+          dimension: 32,
           child: Checkbox.adaptive(value: value, onChanged: onChanged),
         ),
       ],
@@ -306,28 +309,35 @@ class _EasingDropdownRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return _MenuRow(
       title: title,
       children: [
         Expanded(
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              value: value,
-              onChanged: onChanged,
-              items: [
-                DropdownMenuItem(
-                  value: StrokeEasings.identity,
-                  child: Text('identity'),
-                ),
-                DropdownMenuItem(
-                  value: StrokeEasings.easeInOut,
-                  child: Text('easeInOut'),
-                ),
-                DropdownMenuItem(
-                  value: StrokeEasings.easeOutCubic,
-                  child: Text('easeOutCubic'),
-                ),
-              ],
+          child: Padding(
+            padding: .symmetric(horizontal: 4),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton(
+                value: value,
+                onChanged: onChanged,
+                isDense: true,
+                padding: .symmetric(vertical: 4),
+                style: theme.textTheme.bodyMedium,
+                items: [
+                  DropdownMenuItem(
+                    value: StrokeEasings.identity,
+                    child: Text('identity'),
+                  ),
+                  DropdownMenuItem(
+                    value: StrokeEasings.easeInOut,
+                    child: Text('easeInOut'),
+                  ),
+                  DropdownMenuItem(
+                    value: StrokeEasings.easeOutCubic,
+                    child: Text('easeOutCubic'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -347,7 +357,10 @@ class _MenuRow extends StatelessWidget {
     return Row(
       spacing: 8,
       children: [
-        SizedBox(width: 120, child: Text(title)),
+        SizedBox(
+          width: 132,
+          child: Text(title, maxLines: 1, overflow: .ellipsis),
+        ),
         ...children,
       ],
     );
