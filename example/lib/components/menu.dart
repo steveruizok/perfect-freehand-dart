@@ -3,9 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
 class Menu extends HookWidget {
-  const Menu({super.key, required this.strokeOptions});
+  const Menu({super.key, required this.strokeOptions, required this.showMenu});
 
   final ValueNotifier<StrokeOptions> strokeOptions;
+  final ValueNotifier<bool> showMenu;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,10 @@ class Menu extends HookWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
+            _MenuTitleRow(strokeOptions: strokeOptions, showMenu: showMenu),
+
+            Divider(),
+
             _SliderRow(
               title: 'Size',
               value: strokeOptions.value.size,
@@ -205,6 +210,41 @@ class Menu extends HookWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MenuTitleRow extends StatelessWidget {
+  const _MenuTitleRow({required this.strokeOptions, required this.showMenu});
+
+  final ValueNotifier<StrokeOptions> strokeOptions;
+  final ValueNotifier<bool> showMenu;
+
+  @override
+  Widget build(BuildContext context) {
+    return _MenuRow(
+      title: 'Stroke options',
+      children: [
+        Spacer(),
+        SizedBox.square(
+          dimension: 32,
+          child: IconButton(
+            padding: .zero,
+            onPressed: () => strokeOptions.value = StrokeOptions(),
+            tooltip: 'Reset',
+            icon: Icon(Icons.restore),
+          ),
+        ),
+        SizedBox.square(
+          dimension: 32,
+          child: IconButton(
+            padding: .zero,
+            onPressed: () => showMenu.value = false,
+            tooltip: 'Close',
+            icon: Icon(Icons.close),
+          ),
+        ),
+      ],
     );
   }
 }

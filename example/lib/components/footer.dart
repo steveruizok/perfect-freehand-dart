@@ -28,8 +28,8 @@ class Footer extends HookWidget {
             iconSize: 36,
           ),
           onPressed: () => showMenu.value = !showMenu.value,
-          tooltip: 'Toggle menu',
-          icon: Icon(Icons.menu),
+          tooltip: 'Stroke options',
+          icon: Icon(Icons.tune),
         ),
         SizedBox(width: 8),
         Container(

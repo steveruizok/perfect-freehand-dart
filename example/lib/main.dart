@@ -60,7 +60,10 @@ class DemoPage extends HookWidget {
                       opacity: showMenu.value ? 1 : 0,
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOut,
-                      child: Menu(strokeOptions: strokeOptions),
+                      child: Menu(
+                        strokeOptions: strokeOptions,
+                        showMenu: showMenu,
+                      ),
                     ),
                   ),
                 ),
