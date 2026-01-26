@@ -1,3 +1,7 @@
+## 2.5.2+1
+
+- Fixed a pub.dev analysis issue with dot shorthands.
+
 ## 2.5.2
 
 - Added more dartdoc comments.
