@@ -1,3 +1,8 @@
+## 2.5.2
+
+- Added more dartdoc comments.
+- Gave some love to the [online demo](https://steveruizok.github.io/perfect-freehand-dart/).
+
 ## 2.5.1
 
 - Fix: Fixed NaN values appearing with some inputs, especially those with non-null pressure values.
