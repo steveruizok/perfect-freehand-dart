@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:file_saver/file_saver.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
 import '../main.dart';
@@ -12,8 +12,13 @@ abstract class Exporter {
   static Future<String> export(
     CanvasController controller,
     StrokeOptions strokeOptions,
+    ColorScheme colorScheme,
   ) async {
-    final svg = controller.toSvg(strokeOptions);
+    final svg = controller.toSvg(
+      strokeOptions,
+      colorScheme.surface,
+      colorScheme.onSurface,
+    );
     return await FileSaver.instance.saveFile(
       name: 'freehand',
       bytes: utf8.encode(svg),
@@ -23,14 +28,21 @@ abstract class Exporter {
   }
 }
 
+String _formatColor(Color color) {
+  return 'rgb(${(color.r * 255).round()}, ${(color.g * 255).round()}, ${(color.b * 255).round()})';
+}
+
 extension on CanvasController {
-  String toSvg(StrokeOptions strokeOptions) {
+  String toSvg(StrokeOptions strokeOptions, Color bg, Color fg) {
     final bounds = getBounds(strokeOptions);
     final buffer = StringBuffer();
     buffer.write(
       '<svg width="${bounds.width}" height="${bounds.height}" '
       'viewBox="${bounds.left} ${bounds.top} ${bounds.width} ${bounds.height}" '
       'xmlns="http://www.w3.org/2000/svg">\n',
+    );
+    buffer.write(
+      '<rect x="${bounds.left}" y="${bounds.top}" width="${bounds.width}" height="${bounds.height}" fill="${_formatColor(bg)}"/>\n',
     );
     for (var stroke in strokes) {
       buffer.write('<path d="');
@@ -59,7 +71,7 @@ extension on CanvasController {
           ]);
         }
       }
-      buffer.write('Z" fill="currentColor"/>\n');
+      buffer.write('Z" fill="${_formatColor(fg)}"/>\n');
     }
     buffer.write('</svg>');
     return buffer.toString();

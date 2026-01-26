@@ -65,6 +65,7 @@ class Footer extends HookWidget {
                   final result = await Exporter.export(
                     controller,
                     strokeOptions.value,
+                    theme.colorScheme,
                   );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
