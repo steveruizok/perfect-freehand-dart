@@ -6,11 +6,11 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: .all(8),
+      padding: EdgeInsets.all(8),
       child: Text(
         'perfect_freehand',
         style: TextTheme.of(context).titleMedium,
-        textAlign: .center,
+        textAlign: TextAlign.center,
       ),
     );
   }

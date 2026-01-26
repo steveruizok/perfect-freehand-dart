@@ -8,7 +8,7 @@ issue_tracker: https://github.com/steveruizok/perfect-freehand-dart/issues
 publish_to: "none"
 
 environment:
-  sdk: '>=3.10.0 <4.0.0'
+  sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
   file_saver: ^0.3.1

@@ -14,15 +14,15 @@ class Menu extends HookWidget {
     useListenable(strokeOptions);
     return Container(
       width: 400,
-      padding: .all(16),
-      margin: .all(16),
+      padding: EdgeInsets.all(16),
+      margin: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer.withValues(alpha: 0.96),
-        borderRadius: .circular(16),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: SingleChildScrollView(
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             _MenuTitleRow(strokeOptions: strokeOptions, showMenu: showMenu),
 
@@ -229,7 +229,7 @@ class _MenuTitleRow extends StatelessWidget {
         SizedBox.square(
           dimension: 32,
           child: IconButton(
-            padding: .zero,
+            padding: EdgeInsets.zero,
             onPressed: () => strokeOptions.value = StrokeOptions(),
             tooltip: 'Reset',
             icon: Icon(Icons.restore),
@@ -238,7 +238,7 @@ class _MenuTitleRow extends StatelessWidget {
         SizedBox.square(
           dimension: 32,
           child: IconButton(
-            padding: .zero,
+            padding: EdgeInsets.zero,
             onPressed: () => showMenu.value = false,
             tooltip: 'Close',
             icon: Icon(Icons.close),
@@ -277,12 +277,12 @@ class _SliderRow extends StatelessWidget {
             height: 32,
             child: SliderTheme(
               data: SliderThemeData(
-                showValueIndicator: .never,
+                showValueIndicator: ShowValueIndicator.never,
                 // ignore: deprecated_member_use
                 year2023: false,
                 trackHeight: 8,
                 thumbSize: thumbSize,
-                padding: .symmetric(horizontal: 8),
+                padding: EdgeInsets.symmetric(horizontal: 8),
               ),
               child: Slider(
                 value: value,
@@ -295,7 +295,7 @@ class _SliderRow extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 40, child: Text(label, textAlign: .end)),
+        SizedBox(width: 40, child: Text(label, textAlign: TextAlign.end)),
       ],
     );
   }
@@ -355,13 +355,13 @@ class _EasingDropdownRow extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding: .symmetric(horizontal: 4),
+            padding: EdgeInsets.symmetric(horizontal: 4),
             child: DropdownButtonHideUnderline(
               child: DropdownButton(
                 value: value,
                 onChanged: onChanged,
                 isDense: true,
-                padding: .symmetric(vertical: 4),
+                padding: EdgeInsets.symmetric(vertical: 4),
                 style: theme.textTheme.bodyMedium,
                 items: [
                   DropdownMenuItem(
@@ -399,7 +399,7 @@ class _MenuRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 132,
-          child: Text(title, maxLines: 1, overflow: .ellipsis),
+          child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
         ),
         ...children,
       ],

@@ -20,8 +20,8 @@ class DemoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'perfect_freehand',
-      theme: createTheme(brightness: .light),
-      darkTheme: createTheme(brightness: .dark),
+      theme: createTheme(brightness: Brightness.light),
+      darkTheme: createTheme(brightness: Brightness.dark),
       home: const DemoPage(),
     );
   }
@@ -48,7 +48,7 @@ class DemoPage extends HookWidget {
             ),
           ),
           Column(
-            crossAxisAlignment: .start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(child: Header()),
               Expanded(
@@ -78,7 +78,7 @@ class DemoPage extends HookWidget {
         strokeOptions: strokeOptions,
         controller: controller,
       ),
-      floatingActionButtonLocation: .startFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 }
