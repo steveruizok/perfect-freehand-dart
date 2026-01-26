@@ -73,7 +73,11 @@ class DemoPage extends HookWidget {
           ),
         ],
       ),
-      floatingActionButton: Footer(showMenu: showMenu, controller: controller),
+      floatingActionButton: Footer(
+        showMenu: showMenu,
+        strokeOptions: strokeOptions,
+        controller: controller,
+      ),
       floatingActionButtonLocation: .startFloat,
     );
   }

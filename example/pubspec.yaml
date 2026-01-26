@@ -11,6 +11,7 @@ environment:
   sdk: '>=3.10.0 <4.0.0'
 
 dependencies:
+  file_saver: ^0.3.1
   flutter:
     sdk: flutter
   flutter_hooks: ^0.21.3+1
