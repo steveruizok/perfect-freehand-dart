@@ -18,16 +18,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup cache
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: |
-            build
-          key: ${{ runner.OS }}-perfect-freehand-${{ hashFiles('pubspec.lock', '**/pubspec.lock') }}-${{ hashFiles('**/*.dart') }}
+            .dart_tool/
+            build/
+            pubspec.lock
+            ~/.dartServer/
+            ~/.dart-tool/
+          key: ${{ runner.OS }}-perfect_freehand-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: |
-            ${{ runner.OS }}-perfect-freehand-${{ hashFiles('pubspec.lock', '**/pubspec.lock') }}-
+            ${{ runner.OS }}-perfect_freehand-
+
+      - name: Setup web cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            example/.dart_tool/
+            example/build/
+            example/pubspec.lock
+          key: ${{ runner.OS }}-perfect_freehand_web-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-perfect_freehand_web-
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
