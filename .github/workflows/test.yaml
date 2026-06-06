@@ -19,8 +19,6 @@ jobs:
             .dart_tool/
             build/
             pubspec.lock
-            ~/.dartServer/
-            ~/.dart-tool/
           key: ${{ runner.OS }}-perfect_freehand-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: |
             ${{ runner.OS }}-perfect_freehand-
