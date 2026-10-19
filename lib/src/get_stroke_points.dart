@@ -21,9 +21,17 @@ List<StrokePoint> getStrokePoints(
   final pts =
       points.map((p) => p.copyWith(pressure: p.pressure ?? 0.5)).toList();
 
-  // If we have two equal points, treat them as a single point.
-  if (pts.length == 2 && pts.first == pts.last) {
-    pts.removeLast();
+  // If all points stay within the stroke's size of the first one (e.g. a tap,
+  // which often drifts by a fraction of a pixel), treat them as a single
+  // point with the highest pressure applied, so the dot's size reflects how
+  // hard it was pressed.
+  if (pts.length > 1 &&
+      pts.every((p) => p.distanceTo(pts.first) <= options.size)) {
+    final maxPressure =
+        pts.map((p) => p.pressure!).reduce((a, b) => a > b ? a : b);
+    pts
+      ..removeRange(1, pts.length)
+      ..[0] = pts.first.copyWith(pressure: maxPressure);
   }
 
   // Add extra points between the two, to help avoid "dash" lines
@@ -37,16 +45,9 @@ List<StrokePoint> getStrokePoints(
     }
   }
 
-  // If there's only one point, add another point at a 1pt offset.
-  // Don't mutate the input array!
-  if (pts.length == 1) {
-    final first = pts.first;
-    pts.add(PointVector(
-      first.x + 1,
-      first.y + 1,
-      first.pressure,
-    ));
-  }
+  // A single point is left alone: [getStrokeOutlinePoints] draws it as a
+  // round dot. (Adding a second point at a 1pt offset, as before, stretched
+  // the dot diagonally.)
 
   /// Updates the pressure of the point at index [i].
   /// This is used in [getStrokeOutlinePoints] if [rememberSimulatedPressure]
@@ -91,8 +92,9 @@ List<StrokePoint> getStrokePoints(
         // and the current point.
         : prev.point.lerp(t, pts[i]);
 
-    // If the new point is the same as the previous point, skip ahead.
-    if (point == prev.point) continue;
+    // If the new point is at the same position as the previous point,
+    // skip ahead (even if its pressure differs).
+    if (point.isAtSamePositionAs(prev.point)) continue;
 
     // How far is the new point from the previous point?
     final distance = point.distanceTo(prev.point);

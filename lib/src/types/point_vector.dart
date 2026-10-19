@@ -173,6 +173,13 @@ class PointVector extends Offset {
     );
   }
 
+  /// Whether this point has the same [x] and [y] values as [other],
+  /// ignoring [pressure].
+  ///
+  /// Unlike [operator ==], this treats a stationary pen
+  /// that reports varying pressures as a single position.
+  bool isAtSamePositionAs(Offset other) => x == other.dx && y == other.dy;
+
   /// Compares this [PointVector] to an [Offset] or [PointVector] [other]
   /// for equality.
   ///

@@ -10,6 +10,7 @@ import 'example_inputs/hey.dart';
 import 'example_inputs/many_points.dart';
 import 'example_inputs/number_pairs.dart';
 import 'example_inputs/one_point.dart';
+import 'example_inputs/stationary_points.dart';
 import 'example_inputs/two_equal_points.dart';
 import 'example_inputs/two_points.dart';
 import 'example_inputs/with_duplicates.dart';
@@ -18,6 +19,7 @@ const _exampleInputs = {
   "one_point": onePoint,
   "two_points": twoPoints,
   "two_equal_points": twoEqualPoints,
+  "stationary_points": stationaryPoints,
   "with_duplicates": withDuplicates,
   "number_pairs": numberPairs,
   "many_points": manyPoints,

@@ -253,8 +253,10 @@ List<Offset> getStrokeOutlinePoints(
    */
 
   final firstPoint = points.first.point;
+  // A lone point has a zero vector, so offset it by a fixed amount instead
+  // to give the dot a direction (as the original JS library does).
   final lastPoint =
-      points.length > 1 ? points.last.point : firstPoint + points.first.vector;
+      points.length > 1 ? points.last.point : firstPoint + PointVector.one;
 
   final startCap = <PointVector>[];
   final endCap = <PointVector>[];
